@@ -14,6 +14,17 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            screens: {
+                // Small phone (up to 479px)
+                'sphone': { 'max': '479px' },
+                // Regular phone (up to 699px)
+                'phone': { 'max': '699px' },
+                // Tablet range (700px - 1024px)
+                'tablet': { 'min': '700px', 'max': '1024px' },
+                // Desktop breakpoints
+                'desktop1100': '1100px',
+                'desktop1400': '1400px',
+            },
         },
     },
 
