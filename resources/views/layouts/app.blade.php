@@ -164,7 +164,7 @@
                     <h4 class="mb-4 text-base font-semibold sm:text-lg">Contact Info</h4>
                     <ul class="space-y-2 text-sm text-gray-400 sm:text-base">
                         <li>Email: info@tambubong.health</li>
-                        <li>Phone: (123) 456-7890</li>
+                        <li>Phone: 0991-275-1509</li>
                         <li>Address: Tambubong, San Rafael, Bulacan</li>
                     </ul>
                 </div>

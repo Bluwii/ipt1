@@ -68,99 +68,106 @@
             </p>
         </div>
         
-        <div class="grid grid-cols-1 gap-8 sm:gap-5 md:grid-cols-3">
-    <!-- Service 1: Check Up -->
-    <div class="overflow-hidden text-center transition-all duration-300 transform bg-blue-50 rounded-xl hover:shadow-xl hover:-translate-y-2">
-        <!-- Image Container - Edge to Edge -->
-        <img src="{{ asset('image/checkup.png') }}" alt="Check Up Services" class="w-full">
-        
-        <!-- Content -->
-        <div class="p-6 sm:p-8">
-            <h3 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">CHECK UP</h3>
-            <ul class="space-y-2 text-left text-gray-600">
-                <li class="flex items-start">
-                    <svg class="w-5 h-5 mt-0.5 mr-2 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>General Health Check-up</span>
-                </li>
-                <li class="flex items-start">
-                    <svg class="w-5 h-5 mt-0.5 mr-2 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Pregnancy Check-up</span>
-                </li>
-                <li class="flex items-start">
-                    <svg class="w-5 h-5 mt-0.5 mr-2 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Child Growth Monitoring</span>
-                </li>
-                <li class="flex items-start">
-                    <svg class="w-5 h-5 mt-0.5 mr-2 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Common Illness Consultations</span>
-                </li>
-            </ul>
+        <div class="grid grid-cols-1 gap-8 sm:gap-8 md:grid-cols-3">
+            <!-- Service 1: Check Up -->
+            <div class="flex flex-col h-full overflow-hidden text-center transition-all duration-300 transform border border-gray-200 bg-blue-50 rounded-xl hover:shadow-xl hover:-translate-y-2">
+                <!-- Image Container -->
+                <div class="w-full">
+                    <img src="{{ asset('image/checkup.png') }}" alt="Check Up Services" class="w-full">
+                </div>
+                
+                <!-- Content -->
+                <div class="flex flex-col flex-grow p-6">
+                    <h3 class="mb-4 text-xl font-bold text-gray-900">CHECK UP</h3>
+                    <ul class="space-y-2 text-left text-gray-600">
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 mt-0.5 mr-2 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>General Health Check-up</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 mt-0.5 mr-2 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Pregnancy Check-up</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 mt-0.5 mr-2 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Child Growth Monitoring</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 mt-0.5 mr-2 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Common Illness Consultations</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>  
+            
+            <!-- Service 2: Vaccine -->
+            <div class="flex flex-col h-full overflow-hidden text-center transition-all duration-300 transform border border-gray-200 bg-green-50 rounded-xl hover:shadow-xl hover:-translate-y-2">
+                <!-- Image Container -->
+                <div class="w-full">
+                    <img src="{{ asset('image/vaccine.png') }}" alt="Vaccine Services" class="w-full">
+                </div>
+                
+                <!-- Content -->
+                <div class="flex flex-col flex-grow p-6">
+                    <h3 class="mb-4 text-xl font-bold text-gray-900">VACCINE</h3>
+                    <ul class="space-y-2 text-left text-gray-600">
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 mt-0.5 mr-2 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Child Vaccinations</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 mt-0.5 mr-2 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Adult Vaccinations</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 mt-0.5 mr-2 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Pregnancy Vaccinations</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Service 3: Request Medicine -->
+            <div class="flex flex-col h-full overflow-hidden text-center transition-all duration-300 transform border border-gray-200 bg-purple-50 rounded-xl hover:shadow-xl hover:-translate-y-2">
+                <!-- Image Container -->
+                <div class="w-full">
+                    <img src="{{ asset('image/medecine.png') }}" alt="Medicine Services" class="w-full">
+                </div>
+                
+                <!-- Content -->
+                <div class="flex flex-col flex-grow p-6">
+                    <h3 class="mb-4 text-xl font-bold text-gray-900">REQUEST MEDICINE</h3>
+                    <ul class="space-y-2 text-left text-gray-600">
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 mt-0.5 mr-2 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Medication Assistance</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 mt-0.5 mr-2 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Free Medication Support</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-    </div>  
-    
-    <!-- Service 2: Vaccine -->
-    <div class="overflow-hidden text-center transition-all duration-300 transform bg-green-50 rounded-xl hover:shadow-xl hover:-translate-y-2">
-        <!-- Image Container - Edge to Edge -->
-        <img src="{{ asset('image/vaccine.png') }}" alt="Vaccine Services" class="w-full">
-        
-        <!-- Content -->
-        <div class="p-6 sm:p-8">
-            <h3 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">VACCINE</h3>
-            <ul class="space-y-2 text-left text-gray-600">
-                <li class="flex items-start">
-                    <svg class="w-5 h-5 mt-0.5 mr-2 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Child Vaccinations</span>
-                </li>
-                <li class="flex items-start">
-                    <svg class="w-5 h-5 mt-0.5 mr-2 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Adult Vaccinations</span>
-                </li>
-                <li class="flex items-start">
-                    <svg class="w-5 h-5 mt-0.5 mr-2 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Pregnancy Vaccinations</span>
-                </li>
-            </ul>
-        </div>
-    </div>
-    
-    <!-- Service 3: Request Medicine -->
-    <div class="overflow-hidden text-center transition-all duration-300 transform bg-purple-50 rounded-xl hover:shadow-xl hover:-translate-y-2">
-        <!-- Image Container - Edge to Edge -->
-            <img src="{{ asset('image/medecine.png') }}" alt="Medicine Services" class="w-full">
-        <!-- Content -->
-        <div class="p-6 sm:p-8">
-            <h3 class="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">REQUEST MEDICINE</h3>
-            <ul class="space-y-2 text-left text-gray-600">
-                <li class="flex items-start">
-                    <svg class="w-5 h-5 mt-0.5 mr-2 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Medication Assistance</span>
-                </li>
-                <li class="flex items-start">
-                    <svg class="w-5 h-5 mt-0.5 mr-2 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Free Medication Support</span>
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
     </div>
 </section>
 
