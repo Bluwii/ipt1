@@ -172,7 +172,7 @@
 </section>
 
 <!-- CTA Section -->
-<section id="contact" class="py-12 bg-blue-600 sm:py-16 lg:py-20">
+<section class="py-12 bg-blue-600 sm:py-16 lg:py-20">
     <div class="max-w-4xl px-4 mx-auto text-center sm:px-6 lg:px-8">
         <h2 class="mb-4 text-3xl font-bold text-white sm:text-4xl sm:mb-6">Ready to Get Started?</h2>
         <p class="mb-6 text-base text-blue-100 sm:text-lg md:text-xl sm:mb-8">

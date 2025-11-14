@@ -25,13 +25,13 @@
                     <a href="{{ route('welcome') }}" class="text-gray-700 hover:text-blue-600 font-medium {{ request()->routeIs('welcome') ? 'text-blue-600' : '' }}">
                         Home
                     </a>
-                    <a href="#about" class="font-medium text-gray-700 hover:text-blue-600">
+                    <a href="{{ route ('about')}}" class="font-medium text-gray-700 hover:text-blue-600{{ request()->routeIs('about') ? 'text-blue-600' : '' }}">
                         About
                     </a>
-                    <a href="#services" class="font-medium text-gray-700 hover:text-blue-600">
+                    <a href="{{ route('welcome') }}#services" class="font-medium text-gray-700 hover:text-blue-600">
                         Services
                     </a>
-                    <a href="#contact" class="font-medium text-gray-700 hover:text-blue-600">
+                    <a href="{{ route('contact')}}" class="font-medium text-gray-700 hover:text-blue-600 {{ request()->routeIs('contact') ? 'text-blue-600' : '' }}">
                         Contact Us
                     </a>
                 </div>
@@ -94,10 +94,10 @@
                 <a href="#about" class="block px-3 py-2 text-base font-medium text-gray-700 rounded-md hover:text-blue-600 hover:bg-gray-50">
                     About
                 </a>
-                <a href="#services" class="block px-3 py-2 text-base font-medium text-gray-700 rounded-md hover:text-blue-600 hover:bg-gray-50">
+                <a href="{{ route('welcome') }}#services" class="block px-3 py-2 text-base font-medium text-gray-700 rounded-md hover:text-blue-600 hover:bg-gray-50">
                     Services
                 </a>
-                <a href="#contact" class="block px-3 py-2 text-base font-medium text-gray-700 rounded-md hover:text-blue-600 hover:bg-gray-50">
+                <a href="{{ route('contact')}}" class="block px-3 py-2 text-base font-medium text-gray-700 rounded-md hover:text-blue-600 hover:bg-gray-50 {{ request()->routeIs('contact') ? 'text-blue-600 bg-blue-50' : '' }}">
                     Contact Us
                 </a>
                 
@@ -124,7 +124,7 @@
                         <a href="{{ route('register') }}" class="block px-3 py-2 mt-2 text-base font-medium text-center text-white bg-blue-600 rounded-md hover:bg-blue-700">
                             Sign Up
                         </a>
-                    @endguest
+                    @endauth
                 </div>
             </div>
         </div>
@@ -148,8 +148,8 @@
                     <ul class="space-y-2 text-sm sm:text-base">
                         <li><a href="{{ route('welcome') }}" class="text-gray-400 hover:text-white">Home</a></li>
                         <li><a href="#about" class="text-gray-400 hover:text-white">About</a></li>
-                        <li><a href="#services" class="text-gray-400 hover:text-white">Services</a></li>
-                        <li><a href="#contact" class="text-gray-400 hover:text-white">Contact</a></li>
+                        <li><a href="{{ route('welcome') }}#services" class="text-gray-400 hover:text-white">Services</a></li>
+                        <li><a href="{{ route('contact') }}" class="text-gray-400 hover:text-white">Contact</a></li>
                     </ul>
                 </div>
                 <div>
