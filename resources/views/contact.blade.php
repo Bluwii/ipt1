@@ -9,11 +9,11 @@
         <!-- Header -->
         <div class="mb-16 text-center">
             <h1 class="mb-4 text-4xl font-bold md:text-4xl">Contact Us</h1>
-             <p class="max-w-xl mx-auto text-lg text-gray-600 ">
-        Connect with Tambubong Health Center today. Call, message, or visit our Facebook page 
-        for all your healthcare needs and community health services.
-    </p>
-        </div>
+            <p class="mx-auto text-lg text-gray-600 max-3-xl ">
+            Connect with Tambubong Health Center today. Call, message, or visit our Facebook page 
+            for all your healthcare needs and community health services.
+            </p>
+        </div><br><br>
 
         <!-- Contact Cards -->
         <div class="grid max-w-4xl grid-cols-1 gap-8 mx-auto md:grid-cols-2">

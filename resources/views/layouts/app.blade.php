@@ -91,7 +91,7 @@
                 <a href="{{ route('welcome') }}" class="block px-3 py-2 text-base font-medium text-gray-700 rounded-md hover:text-blue-600 hover:bg-gray-50 {{ request()->routeIs('welcome') ? 'text-blue-600 bg-blue-50' : '' }}">
                     Home
                 </a>
-                <a href="#about" class="block px-3 py-2 text-base font-medium text-gray-700 rounded-md hover:text-blue-600 hover:bg-gray-50">
+                <a href="{{ route('about') }}" class="block px-3 py-2 text-base font-medium text-gray-700 rounded-md hover:text-blue-600 hover:bg-gray-50 {{ request()->routeIs('about') ? 'text-blue-600 bg-blue-50' : '' }}">
                     About
                 </a>
                 <a href="{{ route('welcome') }}#services" class="block px-3 py-2 text-base font-medium text-gray-700 rounded-md hover:text-blue-600 hover:bg-gray-50">
