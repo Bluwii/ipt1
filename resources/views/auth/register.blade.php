@@ -10,7 +10,7 @@
         </div>
 
         <!-- Sign-Up Title -->
-        <h2 class="mb-6 text-xl font-bold text-center text-gray-900">Create Your Account</h2>
+        <h2 class="mb-6 text-2xl font-bold text-center text-gray-900">Create Your Account</h2>
 
         <form method="POST" action="{{ route('register') }}">
             @csrf
@@ -88,14 +88,14 @@
                 </div>
             </div>
 
-            <!-- Row 3: Gender, Purok No., and Password -->
-            <div class="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-3">
+            <!-- Row 3: Gender and Purok No. -->
+            <div class="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-2">
                 <!-- Gender -->
                 <div>
                     <x-input-label for="gender" value="Gender:" class="mb-2 font-semibold" />
                     <select id="gender" 
                         name="gender" 
-                        class="block w-full px-4 py-3 truncate border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500"
+                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500"
                         required>
                         <option value="">Select Gender</option>
                         <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
@@ -110,7 +110,7 @@
                     <x-input-label for="purok_no" value="Purok No.:" class="mb-2 font-semibold" />
                     <select id="purok_no" 
                         name="purok_no" 
-                        class="block w-full px-4 py-3 truncate border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500"
+                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500"
                         required>
                         <option value="">Select Purok No.</option>
                         <option value="1" {{ old('purok_no') == '1' ? 'selected' : '' }}>Purok 1</option>
@@ -122,22 +122,22 @@
                     </select>
                     <x-input-error :messages="$errors->get('purok_no')" class="mt-2" />
                 </div>
-
-                <!-- Password -->
-                <div>
-                    <x-input-label for="password" value="Password:" class="mb-2 font-semibold" />
-                    <x-text-input id="password" 
-                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500"
-                        type="password"
-                        name="password"
-                        placeholder="Create your password"
-                        required 
-                        autocomplete="new-password" />
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                </div>
             </div>
 
-            <!-- Row 4: Confirm Password (Full Width) -->
+            <!-- Row 4: Password (Full Width) -->
+            <div class="mb-4">
+                <x-input-label for="password" value="Password:" class="mb-2 font-semibold" />
+                <x-text-input id="password" 
+                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500"
+                    type="password"
+                    name="password"
+                    placeholder="Create your password"
+                    required 
+                    autocomplete="new-password" />
+                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            </div>
+
+            <!-- Row 5: Confirm Password (Full Width) -->
             <div class="mb-6">
                 <x-input-label for="password_confirmation" value="Confirm Password:" class="mb-2 font-semibold" />
                 <x-text-input id="password_confirmation" 
