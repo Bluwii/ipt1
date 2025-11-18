@@ -20,7 +20,7 @@ export default {
                 // Regular phone (up to 699px)
                 'phone': { 'max': '699px' },
                 // Tablet range (700px - 1024px)
-                'tablet': { 'min': '700px', 'max': '1024px' },
+                'tablet': { 'min': '768px', 'max': '1024px' },
                 // Desktop breakpoints
                 'desktop1100': '1100px',
                 'desktop1400': '1400px',

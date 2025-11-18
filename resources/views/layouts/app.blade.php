@@ -136,6 +136,7 @@
     </main>
     
     <!-- Footer -->
+    @unless(request()->routeIs('dashboard') || request()->routeIs('profile.edit'))
     <footer class="py-8 mt-20 text-white bg-gray-900 sm:py-12">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 gap-8 mb-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -174,6 +175,7 @@
             </div>
         </div>
     </footer>
+    @endunless
 
     @stack('scripts')
 </body>

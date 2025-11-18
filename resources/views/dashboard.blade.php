@@ -14,30 +14,29 @@
             </div>
 
             <!-- User Dropdown -->
-            <div class="relative" x-data="{ open: false }">
-                <button @click="open = !open" class="flex items-center gap-3 px-4 py-2 transition-colors rounded-lg hover:bg-gray-100">
+            <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                <button @click="open = !open" type="button" class="flex items-center gap-3 px-4 py-2 transition-colors rounded-lg hover:bg-gray-100">
                     <div class="flex items-center justify-center w-10 h-10 text-white bg-blue-600 rounded-full">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>
                     </div>
                     <span class="hidden font-medium text-gray-900 sm:block">{{ Auth::user()->name }}</span>
-                    <svg class="w-4 h-4 text-gray-600 transition-transform" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-gray-600 transition-transform duration-200" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
 
                 <!-- Dropdown Menu -->
                 <div x-show="open" 
-                     @click.away="open = false"
+                     x-cloak
                      x-transition:enter="transition ease-out duration-200"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
                      x-transition:leave="transition ease-in duration-150"
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
-                     class="absolute right-0 w-48 mt-2 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5"
-                     style="display: none;">
+                     class="absolute right-0 w-48 mt-2 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
                     <div class="py-1">
                         <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,8 +248,13 @@
 
             <!-- Right Column - 1/3 width -->
             <div class="space-y-8">
-                <!-- Health Tips -->
-                <div class="p-6 text-white shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
+                <!-- Health Tips - Dismissible -->
+                <div x-data="{ show: true }" x-show="show" x-cloak class="relative p-6 text-white shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
+                    <button @click="show = false" class="absolute p-1 text-white transition-colors rounded-lg top-2 right-2 hover:bg-white/20">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                     <h2 class="mb-4 text-xl font-bold">Health Tip of the Day</h2>
                     <div class="space-y-3">
                         <div class="flex items-start gap-3">
@@ -306,8 +310,13 @@
                     </div>
                 </div>
 
-                <!-- Emergency Notice -->
-                <div class="p-6 border-l-4 border-red-500 rounded-lg bg-red-50">
+                <!-- Emergency Notice - Dismissible -->
+                <div x-data="{ show: true }" x-show="show" x-cloak class="relative p-6 border-l-4 border-red-500 rounded-lg bg-red-50">
+                    <button @click="show = false" class="absolute p-1 text-red-600 transition-colors rounded-lg top-2 right-2 hover:bg-red-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                     <div class="flex items-start gap-3">
                         <svg class="flex-shrink-0 w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
