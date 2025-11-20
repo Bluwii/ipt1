@@ -128,19 +128,19 @@
                 <div class="p-6 bg-white shadow-md rounded-xl">
                     <h2 class="mb-4 text-xl font-bold text-gray-900">Quick Actions</h2>
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <button class="flex flex-col items-center justify-center p-4 transition-all border-2 border-blue-200 rounded-lg hover:border-blue-500 hover:bg-blue-50">
+                        <a href="{{ route('appointments.create') }}" class="flex flex-col items-center justify-center p-4 transition-all border-2 border-blue-200 rounded-lg hover:border-blue-500 hover:bg-blue-50">
                             <svg class="w-10 h-10 mb-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                             <span class="font-semibold text-gray-900">Book Appointment</span>
-                        </button>
+                        </a>
 
-                        <button class="flex flex-col items-center justify-center p-4 transition-all border-2 border-purple-200 rounded-lg hover:border-purple-500 hover:bg-purple-50">
+                        <a href="{{ route('records.index') }}" class="flex flex-col items-center justify-center p-4 transition-all border-2 border-purple-200 rounded-lg hover:border-purple-500 hover:bg-purple-50">
                             <svg class="w-10 h-10 mb-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
                             <span class="font-semibold text-gray-900">View Records</span>
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -148,7 +148,7 @@
                 <div class="p-6 bg-white shadow-md rounded-xl">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-xl font-bold text-gray-900">Upcoming Appointments</h2>
-                        <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-800">View All</a>
+                        <a href="{{ route('appointments.index') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">View All</a>
                     </div>
                     <div class="space-y-4">
                         <!-- Appointment Card 1 -->
