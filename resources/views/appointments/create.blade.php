@@ -55,5 +55,202 @@
         </div>
     </div>
 </nav>
-@include('components.appointment-modal')
+
+<div class="min-h-screen py-8 mt-16 bg-gray-50">
+    <div class="px-4 mx-auto max-w-6xl sm:px-6 lg:px-8">
+        <form method="POST" action="{{ route('appointments.store') }}" x-data="{ selectedService: '' }">
+            @csrf
+            
+            <!-- Service Selection Section -->
+            <div class="p-8 mb-8 bg-white shadow-md rounded-2xl">
+                <!-- Back Button and Header -->
+                <div class="mb-8">
+                    <a href="{{ route('appointments.index') }}" class="inline-flex items-center gap-2 mb-6 text-blue-600 transition-colors hover:text-blue-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        <span class="font-medium">Back</span>
+                    </a>
+                    <h2 class="text-2xl font-bold text-center text-gray-900 uppercase">Choose a Service to be Schedule</h2>
+                </div>
+
+                <!-- Service Cards Grid -->
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <!-- Check Up Card -->
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="service_type" value="checkup" x-model="selectedService" class="sr-only peer" required>
+                        <div class="p-8 text-center transition-all border-2 border-gray-200 rounded-2xl peer-checked:border-blue-500 peer-checked:bg-blue-50 hover:border-blue-300 hover:shadow-lg">
+                            <!-- Icon -->
+                            <div class="flex items-center justify-center mb-10">
+                                <div class="p-4 bg-blue-100 rounded-xl">
+                                    <img src="{{ asset('image/bed.png') }}" alt="Check Up Icon" class="w-16 h-16 text-blue-600">
+                                </div>
+                            </div>
+                            <!-- Title -->
+                            <h3 class="text-xl font-bold text-gray-900">Check Up</h3>
+                            <!-- Check Icon (appears when selected) -->
+                            <div class="absolute top-4 right-4">
+                                <div class="items-center justify-center hidden w-6 h-6 text-white bg-blue-600 rounded-full peer-checked:flex">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Vaccine Card -->
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="service_type" value="vaccine" x-model="selectedService" class="sr-only peer" required>
+                        <div class="p-8 text-center transition-all border-2 border-gray-200 rounded-2xl peer-checked:border-red-500 peer-checked:bg-red-50 hover:border-red-300 hover:shadow-lg">
+                            <!-- Icon -->
+                            <div class="flex items-center justify-center mb-10">
+                                <div class="p-4 bg-red-100 rounded-xl">
+                                    <img src="{{ asset('image/injection.png') }}" alt="Vaccine Icon" class="w-16 h-16 text-red-600">
+                                </div>
+                            </div>
+                            <!-- Title -->
+                            <h3 class="text-xl font-bold text-gray-900">Vaccine</h3>
+                            <!-- Check Icon (appears when selected) -->
+                            <div class="absolute top-4 right-4">
+                                <div class="items-center justify-center hidden w-6 h-6 text-white bg-red-600 rounded-full peer-checked:flex">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Request Medicine Card -->
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="service_type" value="medicine" x-model="selectedService" class="sr-only peer" required>
+                        <div class="p-8 text-center transition-all border-2 border-gray-200 rounded-2xl peer-checked:border-purple-500 peer-checked:bg-purple-50 hover:border-purple-300 hover:shadow-lg">
+                            <!-- Icon -->
+                            <div class="flex items-center justify-center mb-10">
+                                <div class="p-4 bg-purple-100 rounded-xl">
+                                    <img src="{{ asset('image/meds.png') }}" alt="Request Medicine Icon" class="w-16 h-16 text-purple-600">
+                                </div>
+                            </div>
+                            <!-- Title -->
+                            <h3 class="text-xl font-bold text-gray-900">Request Medicine</h3>
+                            <!-- Check Icon (appears when selected) -->
+                            <div class="absolute top-4 right-4">
+                                <div class="items-center justify-center hidden w-6 h-6 text-white bg-purple-600 rounded-full peer-checked:flex">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                @error('service_type')
+                    <p class="mt-4 text-sm text-center text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Appointment Details Section (Shows after service selection) -->
+            <div x-show="selectedService !== ''" x-cloak x-transition class="p-8 bg-white shadow-md rounded-2xl">
+                <h2 class="mb-6 text-2xl font-bold text-gray-900">Appointment Details</h2>
+                
+                <div class="space-y-6">
+                    <!-- Date and Time Row -->
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <!-- Appointment Date -->
+                        <div>
+                            <label for="appointment_date" class="block mb-2 text-sm font-semibold text-gray-700">
+                                Preferred Date <span class="text-red-600">*</span>
+                            </label>
+                            <input type="date" id="appointment_date" name="appointment_date" required 
+                                   min="{{ date('Y-m-d', strtotime('+1 day')) }}"
+                                   class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500">
+                            @error('appointment_date')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Appointment Time -->
+                        <div>
+                            <label for="appointment_time" class="block mb-2 text-sm font-semibold text-gray-700">
+                                Preferred Time <span class="text-red-600">*</span>
+                            </label>
+                            <select id="appointment_time" name="appointment_time" required 
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">Select a time slot</option>
+                                <option value="08:00">8:00 AM - 9:00 AM</option>
+                                <option value="09:00">9:00 AM - 10:00 AM</option>
+                                <option value="10:00">10:00 AM - 11:00 AM</option>
+                                <option value="11:00">11:00 AM - 12:00 PM</option>
+                                <option value="13:00">1:00 PM - 2:00 PM</option>
+                                <option value="14:00">2:00 PM - 3:00 PM</option>
+                                <option value="15:00">3:00 PM - 4:00 PM</option>
+                                <option value="16:00">4:00 PM - 5:00 PM</option>
+                            </select>
+                            @error('appointment_time')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Additional Notes -->
+                    <div>
+                        <label for="notes" class="block mb-2 text-sm font-semibold text-gray-700">
+                            Additional Notes (Optional)
+                        </label>
+                        <textarea id="notes" name="notes" rows="4" 
+                                  placeholder="Please provide any additional information or special requests..."
+                                  class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500"></textarea>
+                        <p class="mt-1 text-sm text-gray-500">Maximum 500 characters</p>
+                        @error('notes')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Important Information Box -->
+                    <div class="p-6 border-l-4 border-blue-500 rounded-lg bg-blue-50">
+                        <h3 class="mb-3 font-semibold text-blue-900">Important Information:</h3>
+                        <ul class="space-y-2 text-sm text-blue-800">
+                            <li class="flex items-start gap-2">
+                                <svg class="flex-shrink-0 w-5 h-5 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Please arrive 10 minutes before your scheduled appointment
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <svg class="flex-shrink-0 w-5 h-5 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Bring a valid ID and any relevant medical documents
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <svg class="flex-shrink-0 w-5 h-5 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                For cancellations or rescheduling, notify us 24 hours in advance
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <svg class="flex-shrink-0 w-5 h-5 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                For emergencies, please call 0991-275-1509
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-4 pt-4">
+                        <button type="submit" class="flex-1 px-6 py-3 font-semibold text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            Book Appointment
+                        </button>
+                        <a href="{{ route('appointments.index') }}" class="flex-1 px-6 py-3 font-semibold text-center text-gray-700 transition-colors border-2 border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
