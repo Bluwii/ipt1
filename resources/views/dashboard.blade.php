@@ -3,6 +3,8 @@
 @section('title', 'Dashboard - Tambubong Health Center')
 
 @section('content')
+<!-- Booking Modal -->
+@include('components.appointment-modal')
 <!-- Custom Navigation for Dashboard -->
 <nav class="fixed top-0 z-50 w-full bg-white shadow-sm">
     <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
