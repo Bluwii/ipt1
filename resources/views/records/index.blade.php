@@ -64,51 +64,6 @@
             <p class="mt-2 text-gray-600">View your medical history and health information</p>
         </div>
 
-        <!-- Health Summary Cards -->
-        <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-3">
-            <div class="p-6 bg-white shadow-md rounded-xl">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Blood Type</p>
-                        <p class="mt-1 text-2xl font-bold text-gray-900">O+</p>
-                    </div>
-                    <div class="p-3 bg-red-100 rounded-full">
-                        <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C9.88 2 8.17 3.71 8.17 5.83C8.17 8.72 12 13 12 13S15.83 8.72 15.83 5.83C15.83 3.71 14.12 2 12 2Z"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="p-6 bg-white shadow-md rounded-xl">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Height</p>
-                        <p class="mt-1 text-2xl font-bold text-gray-900">165 cm</p>
-                    </div>
-                    <div class="p-3 bg-blue-100 rounded-full">
-                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="p-6 bg-white shadow-md rounded-xl">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Weight</p>
-                        <p class="mt-1 text-2xl font-bold text-gray-900">65 kg</p>
-                    </div>
-                    <div class="p-3 bg-green-100 rounded-full">
-                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Tabs -->
         <div class="mb-6" x-data="{ activeTab: 'consultations' }">
             <div class="flex overflow-x-auto border-b border-gray-200">

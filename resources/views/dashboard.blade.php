@@ -3,8 +3,7 @@
 @section('title', 'Dashboard - Tambubong Health Center')
 
 @section('content')
-<!-- Booking Modal -->
-@include('components.appointment-modal')
+
 <!-- Custom Navigation for Dashboard -->
 <nav class="fixed top-0 z-50 w-full bg-white shadow-sm">
     <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -63,7 +62,7 @@
     </div>
 </nav>
 
-<div class="min-h-screen py-8 mt-16 bg-gray-50">
+<div class="min-h-screen py-8 mt-16 bg-gray-50" x-data="{ modalOpen: false }">
     <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <!-- Welcome Header -->
         <div class="mb-8">
@@ -130,12 +129,16 @@
                 <div class="p-6 bg-white shadow-md rounded-xl">
                     <h2 class="mb-4 text-xl font-bold text-gray-900">Quick Actions</h2>
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <a href="{{ route('appointments.create') }}" class="flex flex-col items-center justify-center p-4 transition-all border-2 border-blue-200 rounded-lg hover:border-blue-500 hover:bg-blue-50">
+                        <!-- FIXED: Direct dispatch using window.dispatchEvent -->
+                        <button 
+                            @click="window.dispatchEvent(new CustomEvent('open-appointment-modal'))" 
+                            type="button"
+                            class="flex flex-col items-center justify-center p-4 transition-all border-2 border-blue-200 rounded-lg hover:border-blue-500 hover:bg-blue-50">
                             <svg class="w-10 h-10 mb-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                             <span class="font-semibold text-gray-900">Book Appointment</span>
-                        </a>
+                        </button>
 
                         <a href="{{ route('records.index') }}" class="flex flex-col items-center justify-center p-4 transition-all border-2 border-purple-200 rounded-lg hover:border-purple-500 hover:bg-purple-50">
                             <svg class="w-10 h-10 mb-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -333,4 +336,8 @@
         </div>
     </div>
 </div>
+
+<!-- IMPORTANT: Modal must be included here -->
+@include('components.appointment-modal')
+
 @endsection

@@ -176,7 +176,6 @@
         </div>
     </footer>
     @endunless
-
     @stack('scripts')
 </body>
 </html>

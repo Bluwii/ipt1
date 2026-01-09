@@ -88,14 +88,14 @@
             <!-- Main Content -->
             <div class="flex-1">
                 <!-- Hero Section -->
-                <div class="flex items-center justify-between mb-8 overflow-hidden bg-[#d6d9da] shadow-lg rounded-2xl h-40">
+                <div class="flex items-center justify-between mb-8 overflow-hidden bg-[#BAE6FD] shadow-lg rounded-2xl h-40">
                     <div class="pl-6 sm:pl-10">
                         <h1 class="text-2xl font-bold leading-tight text-gray-900 sm:text-2xl lg:text-3xl">
                             Welcome to Barangay<br>Tambubong Health Center
                         </h1>
                     </div>
                     <div class="relative flex-shrink-0 w-1/2 h-full">
-                        <div class="absolute inset-0 bg-gradient-to-l from-transparent to-[#d6d9da] z-10"></div>
+                        <div class="absolute inset-0 bg-gradient-to-l from-transparent to-[#BAE6FD] z-10"></div>
                         <img src="{{ asset('image/hero.png') }}" alt="Health Center Building" class="relative z-0 object-cover w-full h-full rounded-r-2xl">
                     </div>
                 </div>
