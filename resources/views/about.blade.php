@@ -121,14 +121,10 @@
                     <div class="space-y-4">
                         <div class="flex items-center justify-between p-4 rounded-lg bg-gray-50">
                             <span class="font-medium text-gray-700">Monday - Friday</span>
-                            <span class="text-gray-600">8:00 AM - 5:00 PM</span>
-                        </div>
-                        <div class="flex items-center justify-between p-4 rounded-lg bg-gray-50">
-                            <span class="font-medium text-gray-700">Saturday</span>
                             <span class="text-gray-600">8:00 AM - 12:00 PM</span>
                         </div>
                         <div class="flex items-center justify-between p-4 rounded-lg bg-gray-50">
-                            <span class="font-medium text-gray-700">Sunday</span>
+                            <span class="font-medium text-gray-700">Saturday - Monday</span>
                             <span class="font-medium text-red-600">Closed</span>
                         </div>
                         <div class="p-4 mt-4 border-l-4 border-blue-500 rounded-lg bg-blue-50">

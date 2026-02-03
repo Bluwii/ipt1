@@ -45,4 +45,20 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the appointments for the user.
+     */
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
+    /**
+     * Get the health records for the user.
+     */
+    public function healthRecords()
+    {
+        return $this->hasMany(HealthRecord::class);
+    }
 }

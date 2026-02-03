@@ -70,127 +70,148 @@
                 <button @click="activeTab = 'consultations'" 
                         :class="activeTab === 'consultations' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                         class="px-6 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap">
-                    Consultations
+                    Consultations ({{ $consultations->count() }})
                 </button>
                 <button @click="activeTab = 'vaccinations'" 
                         :class="activeTab === 'vaccinations' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                         class="px-6 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap">
-                    Vaccinations
+                    Vaccinations ({{ $vaccinations->count() }})
                 </button>
                 <button @click="activeTab = 'prescriptions'" 
                         :class="activeTab === 'prescriptions' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                         class="px-6 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap">
-                    Prescriptions
+                    Prescriptions ({{ $prescriptions->count() }})
                 </button>
             </div>
 
             <!-- Consultations Tab -->
             <div x-show="activeTab === 'consultations'" class="py-6">
-                <div class="space-y-4">
-                    <div class="p-6 bg-white shadow-md rounded-xl">
-                        <div class="flex items-start justify-between mb-4">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Annual Physical Examination</h3>
-                                <p class="text-sm text-gray-600">Dr. Juan Dela Cruz</p>
+                @if($consultations->count() > 0)
+                    <div class="space-y-4">
+                        @foreach($consultations as $record)
+                            <div class="p-6 bg-white shadow-md rounded-xl">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">{{ $record->title }}</h3>
+                                        <p class="text-sm text-gray-600">{{ $record->provider_name }}</p>
+                                    </div>
+                                    <span class="text-sm text-gray-500">{{ $record->record_date->format('F d, Y') }}</span>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    @if($record->diagnosis)
+                                        <p><span class="font-medium">Diagnosis:</span> {{ $record->diagnosis }}</p>
+                                    @endif
+                                    @if($record->blood_pressure)
+                                        <p><span class="font-medium">Blood Pressure:</span> {{ $record->blood_pressure }}</p>
+                                    @endif
+                                    @if($record->temperature)
+                                        <p><span class="font-medium">Temperature:</span> {{ $record->temperature }}°C</p>
+                                    @endif
+                                    @if($record->heart_rate)
+                                        <p><span class="font-medium">Heart Rate:</span> {{ $record->heart_rate }} bpm</p>
+                                    @endif
+                                    @if($record->notes)
+                                        <p><span class="font-medium">Notes:</span> {{ $record->notes }}</p>
+                                    @endif
+                                </div>
                             </div>
-                            <span class="text-sm text-gray-500">October 15, 2025</span>
-                        </div>
-                        <div class="space-y-2 text-sm">
-                            <p><span class="font-medium">Diagnosis:</span> Overall healthy condition</p>
-                            <p><span class="font-medium">Blood Pressure:</span> 120/80 mmHg</p>
-                            <p><span class="font-medium">Notes:</span> Regular exercise recommended. Follow-up in 6 months.</p>
-                        </div>
+                        @endforeach
                     </div>
-
-                    <div class="p-6 bg-white shadow-md rounded-xl">
-                        <div class="flex items-start justify-between mb-4">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900">General Check-up</h3>
-                                <p class="text-sm text-gray-600">Dr. Maria Santos</p>
-                            </div>
-                            <span class="text-sm text-gray-500">July 20, 2025</span>
-                        </div>
-                        <div class="space-y-2 text-sm">
-                            <p><span class="font-medium">Diagnosis:</span> Mild cold symptoms</p>
-                            <p><span class="font-medium">Temperature:</span> 37.2°C</p>
-                            <p><span class="font-medium">Notes:</span> Prescribed medication for 5 days. Rest and hydration advised.</p>
-                        </div>
+                @else
+                    <div class="p-12 text-center bg-white shadow-md rounded-xl">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <h3 class="mb-2 text-lg font-semibold text-gray-900">No Consultation Records</h3>
+                        <p class="text-gray-600">You don't have any consultation records yet.</p>
                     </div>
-                </div>
+                @endif
             </div>
 
             <!-- Vaccinations Tab -->
             <div x-show="activeTab === 'vaccinations'" class="py-6">
-                <div class="space-y-4">
-                    <div class="p-6 bg-white shadow-md rounded-xl">
-                        <div class="flex items-start justify-between mb-4">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900">COVID-19 Booster Shot</h3>
-                                <p class="text-sm text-gray-600">Nurse Maria Santos</p>
+                @if($vaccinations->count() > 0)
+                    <div class="space-y-4">
+                        @foreach($vaccinations as $record)
+                            <div class="p-6 bg-white shadow-md rounded-xl">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">{{ $record->title }}</h3>
+                                        <p class="text-sm text-gray-600">{{ $record->provider_name }}</p>
+                                    </div>
+                                    <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Completed</span>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    <p><span class="font-medium">Date:</span> {{ $record->record_date->format('F d, Y') }}</p>
+                                    @if($record->vaccine_name)
+                                        <p><span class="font-medium">Vaccine:</span> {{ $record->vaccine_name }}</p>
+                                    @endif
+                                    @if($record->lot_number)
+                                        <p><span class="font-medium">Lot Number:</span> {{ $record->lot_number }}</p>
+                                    @endif
+                                    @if($record->next_dose_date)
+                                        <p><span class="font-medium">Next Dose:</span> {{ $record->next_dose_date->format('F d, Y') }}</p>
+                                    @else
+                                        <p><span class="font-medium">Next Dose:</span> Not required</p>
+                                    @endif
+                                    @if($record->notes)
+                                        <p class="mt-3 text-gray-600">{{ $record->notes }}</p>
+                                    @endif
+                                </div>
                             </div>
-                            <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Completed</span>
-                        </div>
-                        <div class="space-y-2 text-sm">
-                            <p><span class="font-medium">Date:</span> September 15, 2025</p>
-                            <p><span class="font-medium">Vaccine:</span> Pfizer-BioNTech</p>
-                            <p><span class="font-medium">Lot Number:</span> FF1234</p>
-                            <p><span class="font-medium">Next Dose:</span> Not required</p>
-                        </div>
+                        @endforeach
                     </div>
-
-                    <div class="p-6 bg-white shadow-md rounded-xl">
-                        <div class="flex items-start justify-between mb-4">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Influenza Vaccine</h3>
-                                <p class="text-sm text-gray-600">Nurse Ana Cruz</p>
-                            </div>
-                            <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Completed</span>
-                        </div>
-                        <div class="space-y-2 text-sm">
-                            <p><span class="font-medium">Date:</span> June 10, 2025</p>
-                            <p><span class="font-medium">Vaccine:</span> Quadrivalent Influenza Vaccine</p>
-                            <p><span class="font-medium">Lot Number:</span> FLU5678</p>
-                            <p><span class="font-medium">Next Dose:</span> June 2026 (Annual)</p>
-                        </div>
+                @else
+                    <div class="p-12 text-center bg-white shadow-md rounded-xl">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                        </svg>
+                        <h3 class="mb-2 text-lg font-semibold text-gray-900">No Vaccination Records</h3>
+                        <p class="text-gray-600">You don't have any vaccination records yet.</p>
                     </div>
-                </div>
+                @endif
             </div>
 
             <!-- Prescriptions Tab -->
             <div x-show="activeTab === 'prescriptions'" class="py-6">
-                <div class="space-y-4">
-                    <div class="p-6 bg-white shadow-md rounded-xl">
-                        <div class="flex items-start justify-between mb-4">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Amoxicillin 500mg</h3>
-                                <p class="text-sm text-gray-600">Prescribed by Dr. Maria Santos</p>
+                @if($prescriptions->count() > 0)
+                    <div class="space-y-4">
+                        @foreach($prescriptions as $record)
+                            <div class="p-6 bg-white shadow-md rounded-xl">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">{{ $record->title }}</h3>
+                                        <p class="text-sm text-gray-600">Prescribed by {{ $record->provider_name }}</p>
+                                    </div>
+                                    <span class="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-full">Completed</span>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    <p><span class="font-medium">Date Prescribed:</span> {{ $record->record_date->format('F d, Y') }}</p>
+                                    @if($record->dosage)
+                                        <p><span class="font-medium">Dosage:</span> {{ $record->dosage }}</p>
+                                    @endif
+                                    @if($record->frequency)
+                                        <p><span class="font-medium">Frequency:</span> {{ $record->frequency }}</p>
+                                    @endif
+                                    @if($record->duration_days)
+                                        <p><span class="font-medium">Duration:</span> {{ $record->duration_days }} days</p>
+                                    @endif
+                                    @if($record->instructions)
+                                        <p><span class="font-medium">Instructions:</span> {{ $record->instructions }}</p>
+                                    @endif
+                                </div>
                             </div>
-                            <span class="px-3 py-1 text-xs font-semibold text-blue-800 bg-blue-100 rounded-full">Active</span>
-                        </div>
-                        <div class="space-y-2 text-sm">
-                            <p><span class="font-medium">Date Prescribed:</span> July 20, 2025</p>
-                            <p><span class="font-medium">Dosage:</span> 1 capsule, 3 times daily</p>
-                            <p><span class="font-medium">Duration:</span> 5 days</p>
-                            <p><span class="font-medium">Instructions:</span> Take after meals with full glass of water</p>
-                        </div>
+                        @endforeach
                     </div>
-
-                    <div class="p-6 bg-white shadow-md rounded-xl">
-                        <div class="flex items-start justify-between mb-4">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Paracetamol 500mg</h3>
-                                <p class="text-sm text-gray-600">Prescribed by Dr. Juan Dela Cruz</p>
-                            </div>
-                            <span class="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-full">Completed</span>
-                        </div>
-                        <div class="space-y-2 text-sm">
-                            <p><span class="font-medium">Date Prescribed:</span> June 15, 2025</p>
-                            <p><span class="font-medium">Dosage:</span> 1 tablet every 6 hours as needed</p>
-                            <p><span class="font-medium">Duration:</span> As needed for pain/fever</p>
-                            <p><span class="font-medium">Instructions:</span> Do not exceed 4 tablets in 24 hours</p>
-                        </div>
+                @else
+                    <div class="p-12 text-center bg-white shadow-md rounded-xl">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <h3 class="mb-2 text-lg font-semibold text-gray-900">No Prescription Records</h3>
+                        <p class="text-gray-600">You don't have any prescription records yet.</p>
                     </div>
-                </div>
+                @endif
             </div>
         </div>
     </div>
