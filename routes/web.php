@@ -30,9 +30,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+    Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
     
     // Health Records routes
     Route::get('/records', [HealthRecordController::class, 'index'])->name('records.index');
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/admin.php';

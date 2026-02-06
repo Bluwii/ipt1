@@ -61,4 +61,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(HealthRecord::class);
     }
+    
+     /**
+     * Check if user is an admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is a regular user.
+     */
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
 }
