@@ -16,7 +16,7 @@
 <body class="bg-gray-100">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside class="w-64 bg-white shadow-lg" x-data="{ userMenuOpen: false }">
+        <aside class="bg-white shadow-lg w-100" x-data="{ userMenuOpen: false }">
             <div class="flex flex-col h-full">
                 <!-- Logo Section -->
                 <div class="p-6 border-b border-gray-200">
@@ -24,7 +24,7 @@
                         <img src="{{ asset('image/logo.png') }}" alt="Logo" class="w-16 h-16 rounded-full">
                         <div>
                             <h3 class="text-sm font-semibold text-gray-900">Barangay Tambubong</h3>
-                            <p class="text-xs text-gray-600">Health Center</p>
+                            <h3 class="text-sm font-semibold text-gray-900">Health Center</h3>
                         </div>
                     </div>
                     
