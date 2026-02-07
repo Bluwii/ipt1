@@ -111,7 +111,7 @@ class HealthRecordController extends Controller
             ],
         ];
         
-        return view('admin.health-records.index', compact('records'));
+        return view('admin.patient-records.index', compact('records'));
     }
     
     /**
