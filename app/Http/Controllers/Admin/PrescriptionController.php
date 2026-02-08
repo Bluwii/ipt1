@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\HealthRecord;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -14,51 +15,31 @@ class PrescriptionController extends Controller
      */
     public function index(): View
     {
-        // Static prescription data
-        $prescriptions = [
-            [
-                'no' => 1,
-                'patient_name' => 'Joshua Clarence Berdaan',
-                'age' => 23,
-                'dose' => '850 mg',
-                'medicine_request' => 'Cotrimoxazole',
-            ],
-            [
-                'no' => 2,
-                'patient_name' => 'Christian Tenedora',
-                'age' => 30,
-                'dose' => '60 mg',
-                'medicine_request' => 'Ferrous sulfate',
-            ],
-            [
-                'no' => 3,
-                'patient_name' => 'Mekking Debi Cruz',
-                'age' => 12,
-                'dose' => '4 mg',
-                'medicine_request' => 'Salbutamol',
-            ],
-            [
-                'no' => 4,
-                'patient_name' => 'Glo Bermudez',
-                'age' => 45,
-                'dose' => '200 mg',
-                'medicine_request' => '500 mg/10',
-            ],
-            [
-                'no' => 5,
-                'patient_name' => 'Franchisekka Turao',
-                'age' => 25,
-                'dose' => '400 mg',
-                'medicine_request' => 'Albendazole',
-            ],
-            [
-                'no' => 6,
-                'patient_name' => 'Meyvard Atienza',
-                'age' => 38,
-                'dose' => '10 mg',
-                'medicine_request' => 'Nifedipine',
-            ],
-        ];
+        // Get prescription-type health records from database
+        $prescriptions = HealthRecord::where('record_type', 'prescription')
+            ->with('user')
+            ->orderBy('record_date', 'desc')
+            ->get()
+            ->map(function ($record, $index) {
+                // Calculate age
+                $age = 'N/A';
+                if ($record->user && isset($record->user->birthdate)) {
+                    try {
+                        $age = \Carbon\Carbon::parse($record->user->birthdate)->age;
+                    } catch (\Exception $e) {
+                        $age = 'N/A';
+                    }
+                }
+                
+                return [
+                    'no' => $index + 1,
+                    'id' => $record->id,
+                    'patient_name' => $record->user ? $record->user->name : 'Unknown',
+                    'age' => $age,
+                    'dose' => $record->dosage ?? 'N/A',
+                    'medicine_request' => $record->medication_name ?? $record->title,
+                ];
+            })->toArray();
         
         return view('admin.prescriptions.index', compact('prescriptions'));
     }

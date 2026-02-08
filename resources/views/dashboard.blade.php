@@ -71,13 +71,13 @@
         </div>
 
         <!-- Quick Stats Cards -->
-        <div class="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-3">
             <!-- Upcoming Appointments -->
             <div class="p-6 transition-shadow bg-white shadow-md rounded-xl hover:shadow-lg">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Upcoming</p>
-                        <p class="text-3xl font-bold text-blue-600">2</p>
+                        <p class="text-3xl font-bold text-blue-600">{{ $upcomingCount }}</p>
                         <p class="mt-1 text-xs text-gray-500">Appointments</p>
                     </div>
                     <div class="p-3 bg-blue-100 rounded-full">
@@ -93,7 +93,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Health</p>
-                        <p class="text-3xl font-bold text-green-600">5</p>
+                        <p class="text-3xl font-bold text-green-600">{{ $totalRecords }}</p>
                         <p class="mt-1 text-xs text-gray-500">Records</p>
                     </div>
                     <div class="p-3 bg-green-100 rounded-full">
@@ -104,17 +104,17 @@
                 </div>
             </div>
 
-            <!-- Vaccinations -->
+            <!-- Completed Appointments -->
             <div class="p-6 transition-shadow bg-white shadow-md rounded-xl hover:shadow-lg">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Completed</p>
-                        <p class="text-3xl font-bold text-purple-600">3</p>
-                        <p class="mt-1 text-xs text-gray-500">Vaccinations</p>
+                        <p class="text-3xl font-bold text-purple-600">{{ $completedCount }}</p>
+                        <p class="mt-1 text-xs text-gray-500">Appointments</p>
                     </div>
                     <div class="p-3 bg-purple-100 rounded-full">
                         <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
                 </div>
@@ -150,62 +150,70 @@
                 </div>
 
                 <!-- Upcoming Appointments -->
-                <div class="p-6 bg-white shadow-md rounded-xl">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-xl font-bold text-gray-900">Upcoming Appointments</h2>
-                        <a href="{{ route('appointments.index') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">View All</a>
-                    </div>
-                    <div class="space-y-4">
-                        <!-- Appointment Card 1 -->
-                        <div class="p-4 border-l-4 border-blue-500 rounded-lg bg-blue-50">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <p class="font-semibold text-gray-900">General Check-up</p>
-                                    <p class="text-sm text-gray-600">Dr. Juan Dela Cruz</p>
-                                    <div class="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                                        <span class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                            Nov 20, 2025
-                                        </span>
-                                        <span class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                            10:00 AM
-                                        </span>
+                <div class="mb-8">  
+                    <h2 class="mb-6 text-2xl font-bold text-gray-900">Upcoming Appointments</h2>
+                    
+                    @if($upcomingAppointments->count() > 0)
+                        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                            @foreach($upcomingAppointments->take(2) as $appointment)
+                                <div class="overflow-hidden transition-all bg-white shadow-md rounded-xl hover:shadow-xl">
+                                    <div class="p-6 border-l-4 {{ $appointment->service_type === 'checkup' ? 'border-blue-500' : ($appointment->service_type === 'vaccine' ? 'border-green-500' : 'border-purple-500') }}">
+                                        <div class="flex items-start justify-between mb-4">
+                                            <div class="flex-1">
+                                                <div class="flex items-center gap-3 mb-2">
+                                                    <div class="p-2 {{ $appointment->service_type === 'checkup' ? 'bg-blue-100' : ($appointment->service_type === 'vaccine' ? 'bg-green-100' : 'bg-purple-100') }} rounded-lg">
+                                                        <svg class="w-6 h-6 {{ $appointment->service_type === 'checkup' ? 'text-blue-600' : ($appointment->service_type === 'vaccine' ? 'text-green-600' : 'text-purple-600') }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <h3 class="text-lg font-bold text-gray-900">{{ $appointment->service_type_label }}</h3>
+                                                        <p class="text-sm text-gray-600">{{ $appointment->full_name }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span class="px-3 py-1 text-xs font-semibold {{ $appointment->status === 'confirmed' ? 'text-blue-800 bg-blue-200' : 'text-yellow-800 bg-yellow-200' }} rounded-full">
+                                                {{ ucfirst($appointment->status) }}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="space-y-3">
+                                            <div class="flex items-center gap-3 text-sm text-gray-700">
+                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                                <span class="font-medium">{{ $appointment->appointment_date->format('F d, Y') }}</span>
+                                            </div>
+                                            
+                                            <div class="flex items-center gap-3 text-sm text-gray-700">
+                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                <span>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A') }}</span>
+                                            </div>
+                                            
+                                            @if($appointment->notes)
+                                                <div class="p-3 mt-3 rounded-lg bg-gray-50">
+                                                    <p class="text-sm text-gray-600"><span class="font-medium">Notes:</span> {{ $appointment->notes }}</p>
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
-                                <span class="px-3 py-1 text-xs font-semibold text-blue-800 bg-blue-200 rounded-full">Confirmed</span>
-                            </div>
+                            @endforeach
                         </div>
-
-                        <!-- Appointment Card 2 -->
-                        <div class="p-4 border-l-4 border-green-500 rounded-lg bg-green-50">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <p class="font-semibold text-gray-900">Vaccination - COVID Booster</p>
-                                    <p class="text-sm text-gray-600">Nurse Maria Santos</p>
-                                    <div class="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                                        <span class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                            Nov 25, 2025
-                                        </span>
-                                        <span class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                            2:00 PM
-                                        </span>
-                                    </div>
-                                </div>
-                                <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-200 rounded-full">Scheduled</span>
-                            </div>
+                    @else
+                        <div class="p-12 text-center bg-white shadow-md rounded-xl">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <h3 class="mb-2 text-lg font-semibold text-gray-900">No Upcoming Appointments</h3>
+                            <p class="mb-4 text-gray-600">You don't have any scheduled appointments yet.</p>
+                            <button @click="window.dispatchEvent(new CustomEvent('open-appointment-modal'))" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                                Book Appointment
+                            </button>
                         </div>
-                    </div>
+                    @endif
                 </div>
 
                 <!-- Recent Activity -->
@@ -250,7 +258,7 @@
                     </div>
                 </div>
             </div>
-
+        
             <!-- Right Column - 1/3 width -->
             <div class="space-y-8">
                 <!-- Health Tips - Dismissible -->

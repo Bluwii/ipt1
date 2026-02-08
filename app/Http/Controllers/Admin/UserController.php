@@ -15,107 +15,34 @@ class UserController extends Controller
      */
     public function index(Request $request): View
     {
-        $tab = $request->input('tab', 'patients'); // 'patients' or 'workers'
+        $tab = $request->input('tab', 'patients');
         
         if ($tab === 'workers') {
-            // Static workers data
-            $users = [
-                [
-                    'no' => 1,
-                    'worker_name' => 'Vina Noguera',
-                    'email' => 'noguera@health.com',
-                    'role' => 'BHW',
-                    'status' => 'Online',
-                ],
-                [
-                    'no' => 2,
-                    'worker_name' => 'Shelaica Lapis',
-                    'email' => 'lapis@health.com',
-                    'role' => 'BHW',
-                    'status' => 'Offline',
-                ],
-                [
-                    'no' => 3,
-                    'worker_name' => 'Marilyn Canda',
-                    'email' => 'marilyn@health.com',
-                    'role' => 'Secretary',
-                    'status' => 'Offline',
-                ],
-                [
-                    'no' => 4,
-                    'worker_name' => 'Swadiksik Janet',
-                    'email' => 'swadiksik@health.com',
-                    'role' => 'BHW',
-                    'status' => 'Offline',
-                ],
-                [
-                    'no' => 5,
-                    'worker_name' => 'Jennelyn Caruncho',
-                    'email' => 'caruncho@health.com',
-                    'role' => 'Secretary',
-                    'status' => 'Offline',
-                ],
-                [
-                    'no' => 6,
-                    'worker_name' => 'Betty Tenado',
-                    'email' => 'betty@health.com',
-                    'role' => 'Midwife',
-                    'status' => 'Online',
-                ],
-                [
-                    'no' => 7,
-                    'worker_name' => 'Manuel Rene Luis',
-                    'email' => 'manuel@health.com',
-                    'role' => 'Doctor',
-                    'status' => 'Offline',
-                ],
-            ];
+            // Get admin/staff users from database
+            $users = User::where('role', 'admin')
+                ->get()
+                ->map(function ($user, $index) {
+                    return [
+                        'no' => $index + 1,
+                        'worker_name' => $user->name,
+                        'email' => $user->email,
+                        'role' => ucfirst($user->role),
+                        'status' => 'Offline', // Can be enhanced with online tracking
+                    ];
+                })->toArray();
         } else {
-            // Static patients data
-            $users = [
-                [
-                    'no' => 1,
-                    'patient_name' => 'Debz De Ocampo',
-                    'email' => 'DebzDeOcampo@email.com',
-                    'phone' => '09234******',
-                    'status' => 'Online',
-                ],
-                [
-                    'no' => 2,
-                    'patient_name' => 'Theo Sandoval',
-                    'email' => 'Theo68@gmail.com',
-                    'phone' => '09534******',
-                    'status' => 'Offline',
-                ],
-                [
-                    'no' => 3,
-                    'patient_name' => 'Zia Vasquez',
-                    'email' => 'ziavasquez@gmail.com',
-                    'phone' => '09042******',
-                    'status' => 'Offline',
-                ],
-                [
-                    'no' => 4,
-                    'patient_name' => 'Lechelle Lozano',
-                    'email' => 'lechelleabcd@yahoo.com',
-                    'phone' => '09563******',
-                    'status' => 'Online',
-                ],
-                [
-                    'no' => 5,
-                    'patient_name' => 'Jane Ann Santisteban',
-                    'email' => 'JaneAnn876@email.com',
-                    'phone' => '09889******',
-                    'status' => 'Offline',
-                ],
-                [
-                    'no' => 6,
-                    'patient_name' => 'Trisha Jean Galiza',
-                    'email' => 'trishagaliza@gmail.com',
-                    'phone' => '09021******',
-                    'status' => 'Online',
-                ],
-            ];
+            // Get regular users (patients) from database
+            $users = User::where('role', 'user')
+                ->get()
+                ->map(function ($user, $index) {
+                    return [
+                        'no' => $index + 1,
+                        'patient_name' => $user->name,
+                        'email' => $user->email,
+                        'phone' => $user->phone_number ?? 'N/A',
+                        'status' => 'Offline', // Can be enhanced with online tracking
+                    ];
+                })->toArray();
         }
         
         return view('admin.users.index', compact('users', 'tab'));
