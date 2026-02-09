@@ -83,14 +83,40 @@
                         <td class="px-4 py-3 text-sm">
                             <div class="flex items-center justify-center gap-2">
                                 @if($appointment['status'] === 'Pending')
-                                    <button class="px-4 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
-                                        Edit
-                                    </button>
-                                    <button class="px-4 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700">
-                                        Cancel
-                                    </button>
+                                    <!-- Confirm Button -->
+                                    <form method="POST" action="{{ route('admin.appointments.status', $appointment['id']) }}" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="confirmed">
+                                        <button type="submit" class="px-4 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700">
+                                            Confirm
+                                        </button>
+                                    </form>
+                                    
+                                    <!-- Cancel Button -->
+                                    <form method="POST" action="{{ route('admin.appointments.destroy', $appointment['id']) }}" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                onclick="return confirm('Cancel this appointment?')"
+                                                class="px-4 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700">
+                                            Cancel
+                                        </button>
+                                    </form>
+                                @elseif($appointment['status'] === 'Confirmed')
+                                    <!-- Mark Complete Button -->
+                                    <form method="POST" action="{{ route('admin.appointments.status', $appointment['id']) }}" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="completed">
+                                        <button type="submit" class="px-4 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
+                                            Mark Complete
+                                        </button>
+                                    </form>
                                 @else
-                                    <button class="px-4 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700">
+                                    <!-- View Button for Completed/Cancelled -->
+                                    <button onclick="alert('Appointment details: {{ $appointment['patient_name'] }} - {{ $appointment['service_type'] }}')" 
+                                            class="px-4 py-1.5 text-xs font-semibold text-white bg-gray-600 rounded hover:bg-gray-700">
                                         View
                                     </button>
                                 @endif

@@ -82,15 +82,15 @@
             <h2 class="mb-4 text-lg font-bold text-gray-900">Updates</h2>
             <div class="space-y-4">
                 @foreach($notifications as $notification)
-                <div class="flex items-start gap-3 p-3 transition-colors rounded-lg hover:bg-gray-50">
+                <div class="flex items-start gap-4 p-3 transition-colors rounded-lg hover:bg-gray-50">
                     <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full">
                         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>
                     </div>
                     <div class="flex-1">
-                        <p class="text-sm font-semibold text-gray-900">{{ $notification['user'] }}</p>
-                        <p class="text-xs text-gray-600">{{ $notification['message'] }}</p>
+                        <p class="text-sm font-semibold text-gray-900">{{ $notification['message'] }}</p>
+                        <p class="text-xs text-gray-600">{{ $notification['time'] ?? 'Recently' }}</p>
                     </div>
                     <button class="text-blue-600 hover:text-blue-800">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

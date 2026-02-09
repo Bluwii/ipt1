@@ -49,18 +49,28 @@ class PrescriptionController extends Controller
      */
     public function approve(Request $request, int $id): RedirectResponse
     {
-        // Approval logic here
+        $prescription = HealthRecord::findOrFail($id);
+        
+        // You can add a status field to health_records or use notes
+        $prescription->update([
+            'notes' => ($prescription->notes ?? '') . ' [APPROVED by Admin on ' . now()->format('Y-m-d') . ']'
+        ]);
         
         return redirect()->back()
             ->with('success', 'Prescription approved successfully!');
     }
-    
+
     /**
      * Reject a prescription request.
      */
     public function reject(Request $request, int $id): RedirectResponse
     {
-        // Rejection logic here
+        $prescription = HealthRecord::findOrFail($id);
+        
+        // Mark as rejected in notes
+        $prescription->update([
+            'notes' => ($prescription->notes ?? '') . ' [REJECTED by Admin on ' . now()->format('Y-m-d') . ']'
+        ]);
         
         return redirect()->back()
             ->with('success', 'Prescription rejected!');

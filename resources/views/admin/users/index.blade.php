@@ -82,12 +82,22 @@
                         </td>
                         <td class="px-4 py-3 text-sm">
                             <div class="flex items-center justify-center gap-2">
-                                <button class="px-4 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
+                                <!-- View Button -->
+                                <a href="{{ route('admin.users.show', ['user' => $user['no']]) }}" 
+                                class="px-4 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
                                     View
-                                </button>
-                                <button class="px-4 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700">
-                                    Delete
-                                </button>
+                                </a>
+                                
+                                <!-- Delete Button -->
+                                <form method="POST" action="{{ route('admin.users.destroy', ['user' => $user['no']]) }}" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" 
+                                            onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.')"
+                                            class="px-4 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700">
+                                        Delete
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>

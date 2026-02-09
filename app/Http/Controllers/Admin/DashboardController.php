@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\User;
 use App\Models\HealthRecord;
-use ulluminate\Support\facades\DB;
+use Illuminate\Support\Facades\DB; 
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -25,19 +25,34 @@ class DashboardController extends Controller
             'completed_today' => Appointment::whereDate('appointment_date', today())
                 ->where('status', 'completed')
                 ->count(),
+            'completed_appointments' => Appointment::where('status', 'completed')->count(),
         ];
         
         // Prepare chart data (last 6 months)
         $chartData = [
             'labels' => [],
-            'data' => [],
+            'checkups' => [],
+            'vaccines' => [],
+            'medicine' => [],
         ];
         
         for ($i = 5; $i >= 0; $i--) {
             $date = now()->subMonths($i);
             $chartData['labels'][] = $date->format('M Y');
-            $chartData['data'][] = Appointment::whereYear('appointment_date', $date->year)
+            
+            $chartData['checkups'][] = Appointment::whereYear('appointment_date', $date->year)
                 ->whereMonth('appointment_date', $date->month)
+                ->where('service_type', 'checkup')
+                ->count();
+                
+            $chartData['vaccines'][] = Appointment::whereYear('appointment_date', $date->year)
+                ->whereMonth('appointment_date', $date->month)
+                ->where('service_type', 'vaccine')
+                ->count();
+                
+            $chartData['medicine'][] = Appointment::whereYear('appointment_date', $date->year)
+                ->whereMonth('appointment_date', $date->month)
+                ->where('service_type', 'medicine')
                 ->count();
         }
         
@@ -47,20 +62,17 @@ class DashboardController extends Controller
             ->orderBy('appointment_time', 'desc')
             ->take(5)
             ->get()
-            ->map(function ($appointment) {
+            ->map(function ($appointment, $index) {
                 return [
+                    'id' => $index + 1,
                     'patient_name' => $appointment->full_name,
                     'service' => $appointment->service_type_label,
-                    'date' => $appointment->appointment_date->format('M d, Y'),
-                    'time' => \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A'),
+                    'appointment_date' => $appointment->appointment_date->format('M. d, Y'),
                     'status' => $appointment->status_label,
-                    'status_class' => $appointment->status === 'completed' ? 'success' : 
-                        ($appointment->status === 'pending' ? 'warning' : 
-                        ($appointment->status === 'confirmed' ? 'info' : 'danger')),
+                    'user_id' => str_pad($appointment->user_id, 3, '0', STR_PAD_LEFT),
                 ];
             });
         
-        // Get recent notifications (using latest appointments)
         $notifications = Appointment::with('user')
             ->where('created_at', '>=', now()->subDays(7))
             ->orderBy('created_at', 'desc')
@@ -68,7 +80,8 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($appointment) {
                 return [
-                    'message' => 'New appointment request from ' . $appointment->user->name,
+                    'user' => $appointment->user->name ?? 'Unknown User',
+                    'message' => 'New ' . $appointment->service_type_label . ' appointment',
                     'time' => $appointment->created_at->diffForHumans(),
                     'type' => 'appointment',
                 ];
@@ -76,5 +89,4 @@ class DashboardController extends Controller
         
         return view('admin.dashboard', compact('stats', 'chartData', 'recentAppointments', 'notifications'));
     }
-
 }
