@@ -36,6 +36,10 @@ class HealthRecord extends Model
         'duration_days',
         'instructions',
         'record_date',
+        'prescription_image',
+        'approval_status',
+        'admin_notes',
+        'approved_at',
     ];
 
     /**
@@ -47,6 +51,7 @@ class HealthRecord extends Model
         'record_date' => 'date',
         'next_dose_date' => 'date',
         'temperature' => 'decimal:2',
+        'approved_at' => 'datetime',
     ];
 
     /**

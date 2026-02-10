@@ -5,46 +5,65 @@ namespace App\Http\Controllers;
 use App\Models\HealthRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
 
-class HealthRecordController extends Controller
+class PrescriptionRequestController extends Controller
 {
     /**
-     * Display a listing of health records.
+     * Store a prescription request with image upload.
      */
-    public function index(): View
+    public function store(Request $request)
     {
-        $user = Auth::user();
-        
-        // Get all health records grouped by type
-        $consultations = HealthRecord::forUser($user->id)
-            ->consultations()
-            ->orderBy('record_date', 'desc')
-            ->get();
-            
-        $vaccinations = HealthRecord::forUser($user->id)
-            ->vaccinations()
-            ->orderBy('record_date', 'desc')
-            ->get();
-            
-        $prescriptions = HealthRecord::forUser($user->id)
-            ->prescriptions()
-            ->orderBy('record_date', 'desc')
-            ->get();
-        
-        return view('records.index', compact('consultations', 'vaccinations', 'prescriptions'));
+        $validated = $request->validate([
+            'medication_name' => 'required|string|max:255',
+            'dosage' => 'required|string|max:100',
+            'frequency' => 'required|string|max:100',
+            'duration_days' => 'nullable|integer|min:1|max:365',
+            'instructions' => 'nullable|string|max:1000',
+            'prescription_image' => 'required|image|mimes:jpeg,png,jpg|max:5120', // 5MB max
+        ]);
+
+        // Upload prescription image
+        if ($request->hasFile('prescription_image')) {
+            $image = $request->file('prescription_image');
+            $filename = 'prescription_' . Auth::id() . '_' . time() . '.' . $image->getClientOriginalExtension();
+            $path = $image->storeAs('prescriptions', $filename, 'public');
+            $validated['prescription_image'] = $path;
+        }
+
+        // Create health record as prescription request
+        $healthRecord = HealthRecord::create([
+            'user_id' => Auth::id(),
+            'record_type' => 'prescription',
+            'title' => 'Prescription Request - ' . $validated['medication_name'],
+            'provider_name' => 'Pending Review',
+            'medication_name' => $validated['medication_name'],
+            'dosage' => $validated['dosage'],
+            'frequency' => $validated['frequency'],
+            'duration_days' => $validated['duration_days'] ?? null,
+            'instructions' => $validated['instructions'] ?? null,
+            'prescription_image' => $validated['prescription_image'],
+            'approval_status' => 'pending',
+            'record_date' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Prescription request submitted successfully!',
+            'prescription' => $healthRecord
+        ], 201);
     }
 
     /**
-     * Display the specified health record.
+     * Display prescription requests for user.
      */
-    public function show(HealthRecord $record): View
+    public function index()
     {
-        // Ensure the record belongs to the authenticated user
-        if ($record->user_id !== Auth::user()->id) {
-            abort(403);
-        }
-        
-        return view('records.show', compact('record'));
+        $prescriptions = HealthRecord::where('user_id', Auth::id())
+            ->where('record_type', 'prescription')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('prescriptions.index', compact('prescriptions'));
     }
 }

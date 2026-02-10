@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointment;
+use App\Models\HealthRecord;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\JsonResponse;
@@ -31,38 +34,84 @@ class DataRecordController extends Controller
         $month = $request->input('month');
         $type = $request->input('type'); // 'records', 'medicines', or 'age_visit'
         
-        // Static data for each month and type
-        $data = $this->getStaticMonthlyData($month, $type);
+        // Get the month number (1-12)
+        $monthNumber = array_search($month, [
+            'January', 'February', 'March', 'April', 
+            'May', 'June', 'July', 'August',
+            'September', 'October', 'November', 'December'
+        ]) + 1;
+        
+        $year = now()->year;
+        
+        // Get real data based on type
+        $data = $this->getRealMonthlyData($monthNumber, $year, $type);
         
         return response()->json($data);
     }
     
     /**
-     * Get static monthly data based on month and type.
+     * Get real monthly data based on month, year and type.
+     * ONLY COUNTS APPROVED PRESCRIPTIONS
      */
-    private function getStaticMonthlyData(string $month, string $type): array
+    private function getRealMonthlyData(int $month, int $year, string $type): array
     {
-        // Data Records For Each Month
+        // Data Records For Each Month - REAL DATA
         if ($type === 'records') {
+            $weeks = [
+                ['start' => 1, 'end' => 7],
+                ['start' => 8, 'end' => 14],
+                ['start' => 15, 'end' => 21],
+                ['start' => 22, 'end' => 31]
+            ];
+            
+            $consultations = [];
+            $vaccinations = [];
+            $prescriptions = [];
+            
+            foreach ($weeks as $week) {
+                $consultations[] = HealthRecord::where('record_type', 'consultation')
+                    ->whereYear('record_date', $year)
+                    ->whereMonth('record_date', $month)
+                    ->whereDay('record_date', '>=', $week['start'])
+                    ->whereDay('record_date', '<=', $week['end'])
+                    ->count();
+                
+                $vaccinations[] = HealthRecord::where('record_type', 'vaccination')
+                    ->whereYear('record_date', $year)
+                    ->whereMonth('record_date', $month)
+                    ->whereDay('record_date', '>=', $week['start'])
+                    ->whereDay('record_date', '<=', $week['end'])
+                    ->count();
+                
+                // ⭐ ONLY COUNT APPROVED PRESCRIPTIONS ⭐
+                $prescriptions[] = HealthRecord::where('record_type', 'prescription')
+                    ->where('approval_status', 'approved')
+                    ->whereYear('record_date', $year)
+                    ->whereMonth('record_date', $month)
+                    ->whereDay('record_date', '>=', $week['start'])
+                    ->whereDay('record_date', '<=', $week['end'])
+                    ->count();
+            }
+            
             return [
-                'title' => "Data Records For {$month}",
+                'title' => "Data Records For " . date('F', mktime(0, 0, 0, $month, 1)),
                 'chartType' => 'bar',
                 'data' => [
                     'labels' => ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
                     'datasets' => [
                         [
                             'label' => 'Consultations',
-                            'data' => [45, 52, 48, 55],
+                            'data' => $consultations,
                             'backgroundColor' => 'rgba(54, 162, 235, 0.8)',
                         ],
                         [
                             'label' => 'Vaccinations',
-                            'data' => [30, 35, 28, 32],
+                            'data' => $vaccinations,
                             'backgroundColor' => 'rgba(75, 192, 192, 0.8)',
                         ],
                         [
-                            'label' => 'Prescriptions',
-                            'data' => [25, 28, 22, 30],
+                            'label' => 'Prescriptions (Approved)',
+                            'data' => $prescriptions,
                             'backgroundColor' => 'rgba(153, 102, 255, 0.8)',
                         ],
                     ],
@@ -70,24 +119,49 @@ class DataRecordController extends Controller
             ];
         }
         
-        // Top Prescribed Medicines
+        // Top Prescribed Medicines - ⭐ APPROVED ONLY ⭐
         if ($type === 'medicines') {
+            $medicineData = HealthRecord::where('record_type', 'prescription')
+                ->where('approval_status', 'approved')
+                ->whereYear('record_date', $year)
+                ->whereMonth('record_date', $month)
+                ->whereNotNull('medication_name')
+                ->selectRaw('medication_name, COUNT(*) as count')
+                ->groupBy('medication_name')
+                ->orderByDesc('count')
+                ->limit(5)
+                ->get();
+            
+            $labels = $medicineData->pluck('medication_name')->toArray();
+            $counts = $medicineData->pluck('count')->toArray();
+            
+            $totalOthers = HealthRecord::where('record_type', 'prescription')
+                ->where('approval_status', 'approved')
+                ->whereYear('record_date', $year)
+                ->whereMonth('record_date', $month)
+                ->whereNotNull('medication_name')
+                ->whereNotIn('medication_name', $labels)
+                ->count();
+            
+            if ($totalOthers > 0) {
+                $labels[] = 'Others';
+                $counts[] = $totalOthers;
+            }
+            
+            if (empty($labels)) {
+                $labels = ['No Data'];
+                $counts = [1];
+            }
+            
             return [
-                'title' => "Top Prescribed Medicines - {$month}",
+                'title' => "Top Prescribed Medicines - " . date('F', mktime(0, 0, 0, $month, 1)),
                 'chartType' => 'pie',
                 'data' => [
-                    'labels' => [
-                        'Paracetamol',
-                        'Amoxicillin',
-                        'Cetirizine',
-                        'Ibuprofen',
-                        'Salbutamol',
-                        'Others'
-                    ],
+                    'labels' => $labels,
                     'datasets' => [
                         [
                             'label' => 'Prescriptions',
-                            'data' => [120, 85, 65, 45, 30, 55],
+                            'data' => $counts,
                             'backgroundColor' => [
                                 'rgba(255, 99, 132, 0.8)',
                                 'rgba(54, 162, 235, 0.8)',
@@ -104,15 +178,63 @@ class DataRecordController extends Controller
         
         // Patient Age Visit Per Month
         if ($type === 'age_visit') {
+            $ageGroups = [
+                '0-10' => [0, 10],
+                '11-20' => [11, 20],
+                '21-30' => [21, 30],
+                '31-40' => [31, 40],
+                '41-50' => [41, 50],
+                '51-60' => [51, 60],
+                '60+' => [61, 120]
+            ];
+            
+            $visitCounts = [];
+            
+            $appointmentUserIds = \App\Models\Appointment::whereYear('appointment_date', $year)
+                ->whereMonth('appointment_date', $month)
+                ->pluck('user_id')
+                ->unique();
+            
+            // ⭐ ONLY APPROVED PRESCRIPTIONS ⭐
+            $prescriptionUserIds = HealthRecord::where('record_type', 'prescription')
+                ->where('approval_status', 'approved')
+                ->whereYear('record_date', $year)
+                ->whereMonth('record_date', $month)
+                ->pluck('user_id')
+                ->unique();
+            
+            $userIds = $appointmentUserIds->merge($prescriptionUserIds)->unique();
+            
+            $users = \App\Models\User::whereIn('id', $userIds)
+                ->whereNotNull('birthdate')
+                ->get();
+            
+            foreach ($ageGroups as $label => $range) {
+                $count = 0;
+                
+                foreach ($users as $user) {
+                    try {
+                        $age = \Carbon\Carbon::parse($user->birthdate)->age;
+                        if ($age >= $range[0] && $age <= $range[1]) {
+                            $count++;
+                        }
+                    } catch (\Exception $e) {
+                        continue;
+                    }
+                }
+                
+                $visitCounts[] = $count;
+            }
+            
             return [
-                'title' => "Patient Age Visit - {$month}",
+                'title' => "Patient Age Visit - " . date('F', mktime(0, 0, 0, $month, 1)),
                 'chartType' => 'line',
                 'data' => [
-                    'labels' => ['0-10', '11-20', '21-30', '31-40', '41-50', '51-60', '60+'],
+                    'labels' => array_keys($ageGroups),
                     'datasets' => [
                         [
                             'label' => 'Number of Visits',
-                            'data' => [45, 65, 88, 92, 75, 55, 38],
+                            'data' => $visitCounts,
                             'borderColor' => 'rgba(75, 192, 192, 1)',
                             'backgroundColor' => 'rgba(75, 192, 192, 0.2)',
                             'tension' => 0.4,

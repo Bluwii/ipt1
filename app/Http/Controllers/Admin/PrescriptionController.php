@@ -7,6 +7,7 @@ use App\Models\HealthRecord;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
 class PrescriptionController extends Controller
 {
@@ -15,7 +16,7 @@ class PrescriptionController extends Controller
      */
     public function index(): View
     {
-        // Get prescription-type health records from database
+        // Get prescription-type health records from database WITH images
         $prescriptions = HealthRecord::where('record_type', 'prescription')
             ->with('user')
             ->orderBy('record_date', 'desc')
@@ -38,6 +39,12 @@ class PrescriptionController extends Controller
                     'age' => $age,
                     'dose' => $record->dosage ?? 'N/A',
                     'medicine_request' => $record->medication_name ?? $record->title,
+                    'prescription_image' => $record->prescription_image,
+                    'approval_status' => $record->approval_status,
+                    'admin_notes' => $record->admin_notes,
+                    'frequency' => $record->frequency,
+                    'duration_days' => $record->duration_days,
+                    'instructions' => $record->instructions,
                 ];
             })->toArray();
         
@@ -51,9 +58,11 @@ class PrescriptionController extends Controller
     {
         $prescription = HealthRecord::findOrFail($id);
         
-        // You can add a status field to health_records or use notes
         $prescription->update([
-            'notes' => ($prescription->notes ?? '') . ' [APPROVED by Admin on ' . now()->format('Y-m-d') . ']'
+            'approval_status' => 'approved',
+            'approved_at' => now(),
+            'provider_name' => 'Dr. ' . Auth::user()->name, // Set actual provider
+            'admin_notes' => $request->input('notes', 'Approved')
         ]);
         
         return redirect()->back()
@@ -65,11 +74,15 @@ class PrescriptionController extends Controller
      */
     public function reject(Request $request, int $id): RedirectResponse
     {
+        $request->validate([
+            'reason' => 'required|string|max:500'
+        ]);
+        
         $prescription = HealthRecord::findOrFail($id);
         
-        // Mark as rejected in notes
         $prescription->update([
-            'notes' => ($prescription->notes ?? '') . ' [REJECTED by Admin on ' . now()->format('Y-m-d') . ']'
+            'approval_status' => 'rejected',
+            'admin_notes' => $request->input('reason')
         ]);
         
         return redirect()->back()
