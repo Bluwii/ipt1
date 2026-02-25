@@ -186,7 +186,6 @@
                                         <h3 class="text-lg font-semibold text-gray-900">{{ $record->medication_name ?? $record->title }}</h3>
                                         <p class="text-sm text-gray-500">Submitted {{ $record->created_at->diffForHumans() }}</p>
                                     </div>
-                                    {{-- Approval Status Badge --}}
                                     @if($record->approval_status === 'approved')
                                         <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Approved</span>
                                     @elseif($record->approval_status === 'rejected')
@@ -325,7 +324,15 @@ document.getElementById('prescriptionForm').addEventListener('submit', async fun
     try {
         const response = await fetch('{{ route("prescriptions.store") }}', {
             method: 'POST',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                // FIX: Tell Laravel to return JSON errors instead of a redirect
+                // Without this, a validation failure returns HTML (302 redirect)
+                // which causes response.json() to crash silently
+                'Accept': 'application/json'
+                // NOTE: Do NOT set Content-Type here — the browser must set it
+                // automatically with the multipart/form-data boundary for file uploads
+            },
             body: formData,
         });
 
@@ -342,6 +349,7 @@ document.getElementById('prescriptionForm').addEventListener('submit', async fun
             errorDiv.classList.remove('hidden');
         }
     } catch (err) {
+        console.error('Prescription upload error:', err);
         errorDiv.textContent = 'An unexpected error occurred. Please try again.';
         errorDiv.classList.remove('hidden');
     } finally {

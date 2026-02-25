@@ -140,8 +140,10 @@
                 <!-- Quick Actions -->
                 <div class="p-6 bg-white shadow-md rounded-xl">
                     <h2 class="mb-4 text-xl font-bold text-gray-900">Quick Actions</h2>
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <button @click="window.dispatchEvent(new CustomEvent('open-appointment-modal'))" type="button"
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {{-- FIX: use onclick (plain JS) instead of @click (Alpine) --}}
+                        {{-- These buttons are outside any x-data scope, so Alpine ignores @click --}}
+                        <button onclick="window.dispatchEvent(new CustomEvent('open-appointment-modal'))" type="button"
                                 class="flex flex-col items-center justify-center p-4 transition-all border-2 border-blue-200 rounded-lg hover:border-blue-500 hover:bg-blue-50">
                             <svg class="w-10 h-10 mb-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -156,15 +158,6 @@
                             </svg>
                             <span class="text-sm font-semibold text-gray-900">View Records</span>
                         </a>
-
-                        <!-- Request Prescription shortcut -->
-                        <a href="{{ route('records.index') }}#prescriptions"
-                           class="flex flex-col items-center justify-center p-4 transition-all border-2 border-green-200 rounded-lg hover:border-green-500 hover:bg-green-50">
-                            <svg class="w-10 h-10 mb-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                            </svg>
-                            <span class="text-sm font-semibold text-gray-900">Request Prescription</span>
-                        </a>
                     </div>
                 </div>
 
@@ -172,7 +165,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-2xl font-bold text-gray-900">Upcoming Appointments</h2>
-                        <a href="{{ route('appointments.index') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">View all →</a>
+                        <a href="{{ route('appointments.index') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">View all</a>
                     </div>
 
                     @if($upcomingAppointments->count() > 0)
@@ -227,7 +220,8 @@
                             </svg>
                             <h3 class="mb-2 text-lg font-semibold text-gray-900">No Upcoming Appointments</h3>
                             <p class="mb-4 text-gray-600">You don't have any scheduled appointments yet.</p>
-                            <button @click="window.dispatchEvent(new CustomEvent('open-appointment-modal'))"
+                            {{-- FIX: use onclick instead of @click (no x-data scope here) --}}
+                            <button onclick="window.dispatchEvent(new CustomEvent('open-appointment-modal'))"
                                     class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
                                 Book Appointment
                             </button>
