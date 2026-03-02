@@ -4,23 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class HealthRecord extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
-        'appointment_id',
         'record_type',
         'title',
         'provider_name',
+        'record_date',
         'diagnosis',
         'notes',
         'blood_pressure',
@@ -35,83 +29,45 @@ class HealthRecord extends Model
         'frequency',
         'duration_days',
         'instructions',
-        'record_date',
         'prescription_image',
         'approval_status',
         'admin_notes',
-        'approved_at',
+        'source_appointment_id', // tracks which appointment auto-created this record
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
-        'record_date' => 'date',
+        'record_date'    => 'date',
         'next_dose_date' => 'date',
-        'temperature' => 'decimal:2',
-        'approved_at' => 'datetime',
     ];
 
-    /**
-     * Get the user that owns the health record.
-     */
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the appointment associated with the health record.
-     */
-    public function appointment(): BelongsTo
+    public function sourceAppointment()
     {
-        return $this->belongsTo(Appointment::class);
+        return $this->belongsTo(Appointment::class, 'source_appointment_id');
     }
 
-    /**
-     * Get the record type label.
-     */
-    public function getRecordTypeLabelAttribute(): string
+    // Scopes
+    public function scopeForUser($query, $userId)
     {
-        return match($this->record_type) {
-            'consultation' => 'Consultation',
-            'vaccination' => 'Vaccination',
-            'prescription' => 'Prescription',
-            default => 'Unknown',
-        };
+        return $query->where('user_id', $userId);
     }
 
-    /**
-     * Scope a query to only include consultations.
-     */
     public function scopeConsultations($query)
     {
         return $query->where('record_type', 'consultation');
     }
 
-    /**
-     * Scope a query to only include vaccinations.
-     */
     public function scopeVaccinations($query)
     {
         return $query->where('record_type', 'vaccination');
     }
 
-    /**
-     * Scope a query to only include prescriptions.
-     */
     public function scopePrescriptions($query)
     {
         return $query->where('record_type', 'prescription');
-    }
-
-    /**
-     * Scope a query to only include records for a specific user.
-     */
-    public function scopeForUser($query, $userId)
-    {
-        return $query->where('user_id', $userId);
     }
 }

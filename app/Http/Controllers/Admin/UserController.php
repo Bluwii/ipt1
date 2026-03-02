@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class UserController extends Controller
 {
@@ -21,11 +22,11 @@ class UserController extends Controller
                 ->map(function ($user, $index) {
                     return [
                         'no'          => $index + 1,
-                        'id'          => $user->id,          // ← real ID for routes
+                        'id'          => $user->id,
                         'worker_name' => $user->name,
                         'email'       => $user->email,
                         'role'        => ucfirst($user->role),
-                        'status'      => 'Offline',
+                        'status'      => 'Active',
                     ];
                 })->toArray();
         } else {
@@ -34,11 +35,11 @@ class UserController extends Controller
                 ->map(function ($user, $index) {
                     return [
                         'no'           => $index + 1,
-                        'id'           => $user->id,         // ← real ID for routes
+                        'id'           => $user->id,
                         'patient_name' => $user->name,
                         'email'        => $user->email,
                         'phone'        => $user->phone_number ?? 'N/A',
-                        'status'       => 'Offline',
+                        'status'       => 'Active',
                     ];
                 })->toArray();
         }
@@ -62,23 +63,42 @@ class UserController extends Controller
     public function update(Request $request, User $user): RedirectResponse
     {
         $validated = $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'role'  => 'required|in:user,admin',
+            'name'                  => 'required|string|max:255',
+            'email'                 => 'required|email|unique:users,email,' . $user->id,
+            'role'                  => 'required|in:user,admin',
+            'phone_number'          => 'nullable|string|max:30',
+            'gender'                => 'nullable|in:male,female,other',
+            'birthdate'             => 'nullable|date',
+            'purok_no'              => 'nullable|string|max:20',
+            'password'              => 'nullable|string|min:8|confirmed',
+            'password_confirmation' => 'nullable|string',
         ]);
 
-        $user->update($validated);
+        // Handle password separately
+        if (!empty($validated['password'])) {
+            $validated['password'] = bcrypt($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+        unset($validated['password_confirmation']);
 
-        return redirect()->route('admin.users.index')
+        // Only include columns that actually exist in the DB
+        // This prevents crashes if a migration hasn't been run yet
+        $safeData = [];
+        foreach ($validated as $column => $value) {
+            if (Schema::hasColumn('users', $column)) {
+                $safeData[$column] = $value;
+            }
+        }
+
+        $user->update($safeData);
+
+        return redirect()->route('admin.users.show', $user)
             ->with('success', 'User updated successfully!');
     }
 
-    /**
-     * Toggle user active/disabled status (placeholder for future feature).
-     */
     public function toggleStatus(User $user): RedirectResponse
     {
-        // Future: add an 'is_active' column and toggle it here
         return redirect()->back()->with('info', 'Status toggle not yet implemented.');
     }
 
