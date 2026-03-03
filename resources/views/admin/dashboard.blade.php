@@ -72,16 +72,22 @@
         <!-- Patient's Chart (2/3 width) -->
         <div class="p-6 bg-white shadow lg:col-span-2 rounded-xl">
             <h2 class="mb-4 text-lg font-bold text-gray-900">Patient's Chart (Last 6 Months)</h2>
-            <canvas id="patientsChart" height="80"></canvas>
+            {{-- Wrap canvas in a fixed-height container to prevent distortion --}}
+            <div class="relative w-full" style="height: 280px;">
+                <canvas id="patientsChart"></canvas>
+            </div>
         </div>
 
         <!-- Updates / Notifications (1/3 width) -->
         <div class="p-6 bg-white shadow rounded-xl">
-            <h2 class="mb-4 text-lg font-bold text-gray-900">Recent Activity</h2>
-            <div class="space-y-3">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-gray-900">Recent Activity</h2>
+                <a href="{{ route('admin.appointments.index') }}" class="text-xs font-medium text-blue-600 hover:text-blue-800">View all</a>
+            </div>
+            <div class="space-y-3 overflow-y-auto" style="max-height: 280px;">
                 @forelse($notifications as $notification)
                 <div class="flex items-start gap-3 p-3 transition-colors rounded-lg hover:bg-gray-50">
-                    @if($notification['type'] === 'prescription')
+                    @if(($notification['type'] ?? '') === 'prescription')
                     <div class="flex items-center justify-center flex-shrink-0 bg-yellow-100 rounded-full w-9 h-9">
                         <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -99,10 +105,6 @@
                         <p class="text-xs text-gray-600">{{ $notification['message'] }}</p>
                         <p class="text-xs text-gray-400">{{ $notification['time'] }}</p>
                     </div>
-                    @if($notification['type'] === 'prescription')
-                    <a href="{{ route('admin.prescriptions.index') }}"
-                       class="flex-shrink-0 text-xs font-medium text-yellow-600 hover:text-yellow-800">Review</a>
-                    @endif
                 </div>
                 @empty
                 <p class="py-4 text-sm text-center text-gray-500">No recent activity</p>
@@ -206,9 +208,21 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
-            plugins: { legend: { display: true, position: 'bottom' } },
-            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'bottom' },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, precision: 0 },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
         }
     });
 });
