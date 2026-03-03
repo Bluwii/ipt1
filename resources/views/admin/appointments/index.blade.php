@@ -53,9 +53,19 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($appointments as $appointment)
-                    <tr class="transition-colors hover:bg-gray-50">
+                    <tr class="transition-colors cursor-pointer hover:bg-blue-50"
+                        onclick="window.location='{{ route('admin.appointments.show', $appointment['id']) }}'">
                         <td class="px-4 py-3 text-sm text-gray-900">{{ $appointment['no'] }}</td>
-                        <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $appointment['patient_name'] }}</td>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                            <div class="flex items-center gap-2">
+                                {{ $appointment['patient_name'] }}
+                                @if(!empty($appointment['is_minor']))
+                                    <span class="px-1.5 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">👦 Minor</span>
+                                @else
+                                    <span class="px-1.5 py-0.5 text-xs font-bold bg-green-100 text-green-700 rounded-full">✓ Adult</span>
+                                @endif
+                            </div>
+                        </td>
                         <td class="px-4 py-3 text-sm text-gray-600">
                             {{ $appointment['appointment_date'] }}<br>
                             <span class="text-xs text-gray-400">{{ $appointment['appointment_time'] }}</span>
@@ -73,54 +83,48 @@
                                 <span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Cancelled</span>
                             @endif
                         </td>
-                        <td class="px-4 py-3 text-sm">
+                        <td class="px-4 py-3 text-sm" onclick="event.stopPropagation()">
                             <div class="flex items-center justify-center gap-2">
+                                <!-- View Details -->
+                                <a href="{{ route('admin.appointments.show', $appointment['id']) }}"
+                                   class="px-3 py-1.5 text-xs font-semibold text-white bg-gray-700 rounded hover:bg-gray-900">
+                                    View
+                                </a>
+
                                 @if($s === 'pending')
-                                    <!-- Confirm -->
                                     <form method="POST" action="{{ route('admin.appointments.status', $appointment['id']) }}" class="inline">
-                                        @csrf
-                                        @method('PATCH')
+                                        @csrf @method('PATCH')
                                         <input type="hidden" name="status" value="confirmed">
-                                        <button type="submit"
-                                                class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
+                                        <button type="submit" class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
                                             Confirm
                                         </button>
                                     </form>
-                                    <!-- Cancel -->
                                     <form method="POST" action="{{ route('admin.appointments.destroy', $appointment['id']) }}" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                onclick="return confirm('Cancel this appointment?')"
+                                        @csrf @method('DELETE')
+                                        <button type="submit" onclick="return confirm('Cancel this appointment?')"
                                                 class="px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700">
                                             Cancel
                                         </button>
                                     </form>
 
                                 @elseif($s === 'confirmed')
-                                    <!-- Mark Complete -->
                                     <form method="POST" action="{{ route('admin.appointments.status', $appointment['id']) }}" class="inline">
-                                        @csrf
-                                        @method('PATCH')
+                                        @csrf @method('PATCH')
                                         <input type="hidden" name="status" value="completed">
-                                        <button type="submit"
-                                                class="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700">
-                                            Mark Complete
+                                        <button type="submit" class="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700">
+                                            Complete
                                         </button>
                                     </form>
-                                    <!-- Cancel -->
                                     <form method="POST" action="{{ route('admin.appointments.destroy', $appointment['id']) }}" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                onclick="return confirm('Cancel this appointment?')"
+                                        @csrf @method('DELETE')
+                                        <button type="submit" onclick="return confirm('Cancel this appointment?')"
                                                 class="px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700">
                                             Cancel
                                         </button>
                                     </form>
 
                                 @else
-                                    <span class="text-xs italic text-gray-400">No actions available</span>
+                                    <span class="text-xs italic text-gray-400">—</span>
                                 @endif
                             </div>
                         </td>

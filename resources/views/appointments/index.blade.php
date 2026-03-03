@@ -64,7 +64,7 @@
                 <h1 class="text-3xl font-bold text-gray-900">My Appointments</h1>
                 <p class="mt-2 text-gray-600">View and manage your healthcare appointments</p>
             </div>
-            <button @click="$dispatch('open-appointment-modal')" 
+            <button onclick="window.dispatchEvent(new CustomEvent('open-appointment-modal'))" type="button"
                 class="flex items-center gap-2 px-6 py-3 text-white transition-all bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>

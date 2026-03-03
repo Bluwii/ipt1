@@ -29,7 +29,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Appointments
+    // Appointments — slot check MUST come before wildcard {appointment} routes
+    Route::get('/appointments/slots', [AppointmentController::class, 'slotAvailability'])->name('appointments.slots');
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
@@ -38,7 +39,7 @@ Route::middleware('auth')->group(function () {
     // Health Records
     Route::get('/records', [HealthRecordController::class, 'index'])->name('records.index');
 
-    // Prescription Requests (user submits a prescription image for admin approval)
+    // Prescription Requests
     Route::post('/prescriptions', [PrescriptionRequestController::class, 'store'])->name('prescriptions.store');
     Route::get('/prescriptions', [PrescriptionRequestController::class, 'index'])->name('prescriptions.index');
 });

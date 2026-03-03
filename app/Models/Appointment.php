@@ -33,6 +33,11 @@ class Appointment extends Model
         'notes',
         'status',
         'admin_notes',
+        'is_minor',
+        'guardian_name',
+        'guardian_relationship',
+        'guardian_contact',
+        'guardian_consent',
     ];
 
     /**
@@ -44,6 +49,9 @@ class Appointment extends Model
         'appointment_date' => 'date',
         'appointment_time' => 'datetime:H:i',
         'birthdate' => 'date',
+        'is_minor' => 'boolean',
+        'guardian_consent' => 'boolean',
+        'appointment_date' => 'date',
     ];
 
     /**
