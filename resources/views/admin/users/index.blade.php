@@ -105,18 +105,6 @@
                                     View
                                 </a>
                                 <form method="POST"
-                                      action="{{ route('admin.users.toggle-status', $user['id']) }}"
-                                      class="inline">
-                                    @csrf @method('PATCH')
-                                    @php $active = $user['is_active'] ?? true; @endphp
-                                    <button type="submit"
-                                            data-confirm="{{ $active ? 'Deactivate' : 'Activate' }} this account?"
-                                            onclick="return confirm(this.dataset.confirm)"
-                                            class="px-3 py-1.5 text-xs font-semibold rounded transition-colors {{ $active ? 'text-yellow-700 bg-yellow-100 hover:bg-yellow-200' : 'text-green-700 bg-green-100 hover:bg-green-200' }}">
-                                        {{ $active ? 'Deactivate' : 'Activate' }}
-                                    </button>
-                                </form>
-                                <form method="POST"
                                       action="{{ route('admin.users.destroy', $user['id']) }}"
                                       class="inline"
                                       onsubmit="return confirm('Delete this user? This cannot be undone.')">

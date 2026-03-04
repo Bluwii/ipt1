@@ -1,23 +1,16 @@
 <?php
-// app/Http/Controllers/Admin/AppointmentController.php
-// Replaces / updates the index() method to support filtering by date range and service type.
-// All other methods (show, confirm, complete, cancel) remain unchanged.
 
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\HealthRecord;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
-use Illuminate\Contracts\View\View;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class AppointmentController extends Controller
 {
-    /**
-     * index()
-     * Supports: search (text), service_type, status, date_from, date_to
-     * All filters are optional and stackable.
-     */
     public function index(Request $request): View
     {
         $stats = [
@@ -31,92 +24,158 @@ class AppointmentController extends Controller
             ->orderBy('appointment_date', 'desc')
             ->orderBy('appointment_time', 'desc');
 
-        // ── Filters ────────────────────────────────────────────────────────
-        if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                ->orWhere('last_name',  'like', "%{$search}%")
-                ->orWhere('email',      'like', "%{$search}%");
+        // ── Filters ──────────────────────────────────────────────
+        if ($request->filled('service')) {
+            $query->where('service_type', $request->service);
+        }
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('appointment_date', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('appointment_date', '<=', $request->date_to);
+        }
+
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('first_name', 'like', "%{$s}%")
+                  ->orWhere('last_name',  'like', "%{$s}%")
+                  ->orWhereHas('user', fn($u) => $u->where('name', 'like', "%{$s}%"));
             });
         }
 
-        if ($service = $request->input('service')) {
-            $query->where('service_type', $service);
-        }
-
-        if ($status = $request->input('status')) {
-            $query->where('status', $status);
-        }
-
-        if ($dateFrom = $request->input('date_from')) {
-            $query->whereDate('appointment_date', '>=', $dateFrom);
-        }
-
-        if ($dateTo = $request->input('date_to')) {
-            $query->whereDate('appointment_date', '<=', $dateTo);
-        }
-
-        $appointments = $query->get()
-            ->map(function ($appointment, $index) {
-                return [
-                    'id'               => $appointment->id,
-                    'no'               => $index + 1,
-                    'patient_name'     => $appointment->full_name,
-                    'appointment_date' => $appointment->appointment_date->format('m/d/Y'),
-                    'appointment_time' => \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A'),
-                    'service_type'     => $appointment->service_type_label,
-                    'status'           => $appointment->status,
-                    'status_label'     => $appointment->status_label,
-                    'is_minor'         => $appointment->is_minor ?? false,
-                ];
-            })->toArray();
+        $appointments = $query->get()->map(function ($appointment, $index) {
+            return [
+                'id'               => $appointment->id,
+                'no'               => $index + 1,
+                'patient_name'     => $appointment->full_name,
+                'appointment_date' => $appointment->appointment_date->format('m/d/Y'),
+                'appointment_time' => \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A'),
+                'service_type'     => $appointment->service_type_label,
+                'service_raw'      => $appointment->service_type,
+                'status'           => $appointment->status,
+                'status_label'     => $appointment->status_label,
+                'is_minor'         => $appointment->is_minor ?? false,
+            ];
+        })->toArray();
 
         return view('admin.appointments.index', compact('stats', 'appointments'));
     }
 
-    /** Show a single appointment */
-    public function show(Appointment $appointment)
+    public function show(Appointment $appointment): View
     {
         $appointment->load('user');
-        return view('admin.appointments.show', compact('appointment'));
-    }
 
-    /** Confirm a pending appointment */
-    public function confirm(Appointment $appointment)
-    {
-        try {
-            abort_unless($appointment->status === 'pending', 422, 'Only pending appointments can be confirmed.');
-            $appointment->update(['status' => 'confirmed']);
-            return back()->with('success', 'Appointment confirmed.');
-        } catch (\Exception $e) {
-            Log::error('AppointmentController@confirm: ' . $e->getMessage());
-            return back()->with('error', 'Could not confirm appointment.');
+        // Prescription requests are stored in health_records with record_type='prescription'
+        // Try to match by source_appointment_id first, then fall back to most recent for this user
+        $prescriptionRequest = null;
+        if ($appointment->service_type === 'medicine' && $appointment->user_id) {
+            $prescriptionRequest = HealthRecord::where('user_id', $appointment->user_id)
+                ->where('record_type', 'prescription')
+                ->where('source_appointment_id', $appointment->id)
+                ->first();
+
+            if (!$prescriptionRequest) {
+                // Fall back: most recent prescription record for this user
+                $prescriptionRequest = HealthRecord::where('user_id', $appointment->user_id)
+                    ->where('record_type', 'prescription')
+                    ->latest()
+                    ->first();
+            }
         }
+
+        return view('admin.appointments.show', compact('appointment', 'prescriptionRequest'));
     }
 
-    /** Mark appointment as completed */
-    public function complete(Appointment $appointment)
+    public function updateStatus(Request $request, Appointment $appointment): RedirectResponse
     {
-        try {
-            abort_unless($appointment->status === 'confirmed', 422, 'Only confirmed appointments can be completed.');
-            $appointment->update(['status' => 'completed']);
-            return back()->with('success', 'Appointment marked as completed.');
-        } catch (\Exception $e) {
-            Log::error('AppointmentController@complete: ' . $e->getMessage());
-            return back()->with('error', 'Could not complete appointment.');
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,completed,cancelled',
+        ]);
+
+        $oldStatus = $appointment->status;
+        $newStatus = $request->status;
+
+        $appointment->update(['status' => $newStatus]);
+
+        if ($newStatus === 'completed' && $oldStatus !== 'completed') {
+            $this->createHealthRecordFromAppointment($appointment);
         }
+
+        return redirect()->back()->with('success', 'Appointment status updated successfully!');
     }
 
-    /** Cancel an appointment */
-    public function cancel(Appointment $appointment)
+    public function edit(Appointment $appointment): View
     {
-        try {
-            abort_unless(in_array($appointment->status, ['pending','confirmed']), 422, 'Cannot cancel this appointment.');
-            $appointment->update(['status' => 'cancelled']);
-            return back()->with('success', 'Appointment cancelled.');
-        } catch (\Exception $e) {
-            Log::error('AppointmentController@cancel: ' . $e->getMessage());
-            return back()->with('error', 'Could not cancel appointment.');
+        return view('admin.appointments.edit', compact('appointment'));
+    }
+
+    public function update(Request $request, Appointment $appointment): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status'      => 'required|in:pending,confirmed,completed,cancelled',
+            'admin_notes' => 'nullable|string|max:500',
+        ]);
+
+        $oldStatus = $appointment->status;
+        $appointment->update($validated);
+
+        if ($validated['status'] === 'completed' && $oldStatus !== 'completed') {
+            $this->createHealthRecordFromAppointment($appointment);
+        }
+
+        return redirect()->route('admin.appointments.index')
+            ->with('success', 'Appointment updated successfully!');
+    }
+
+    public function destroy(Appointment $appointment): RedirectResponse
+    {
+        $appointment->update(['status' => 'cancelled']);
+        return redirect()->back()->with('success', 'Appointment cancelled successfully!');
+    }
+
+    private function createHealthRecordFromAppointment(Appointment $appointment): void
+    {
+        $exists = HealthRecord::where('user_id', $appointment->user_id)
+            ->where('source_appointment_id', $appointment->id)
+            ->exists();
+
+        if ($exists) return;
+
+        $map = [
+            'checkup'  => 'consultation',
+            'vaccine'  => 'vaccination',
+            'medicine' => 'prescription',
+        ];
+
+        $recordType = $map[$appointment->service_type] ?? 'consultation';
+
+        $data = [
+            'user_id'               => $appointment->user_id,
+            'record_type'           => $recordType,
+            'title'                 => $appointment->service_type_label . ' — ' .
+                                       $appointment->appointment_date->format('M d, Y'),
+            'provider_name'        => 'Tambubong Health Center',
+            'record_date'           => $appointment->appointment_date,
+            'notes'                 => $appointment->notes ?? null,
+            'source_appointment_id' => $appointment->id,
+        ];
+
+        if ($recordType === 'prescription') {
+            $data['approval_status'] = 'pending';
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('health_records', 'source_appointment_id')) {
+            HealthRecord::create($data);
+        } else {
+            unset($data['source_appointment_id']);
+            HealthRecord::create($data);
         }
     }
 }
