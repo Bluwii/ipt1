@@ -210,6 +210,13 @@
             @endif
         </div>
 
+        <!--Edit Upcoming Appointment-->
+        @if($appointment->status === 'pending')
+            <a href="{{ route('appointments.edit', $appointment) }}"
+            class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
+                Edit
+            </a>
+        @endif
         <!-- Past Appointments Section -->
         <div>
             <h2 class="mb-6 text-2xl font-bold text-gray-900">Past Appointments</h2>

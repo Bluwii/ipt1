@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 
 class UserController extends Controller
@@ -26,7 +27,8 @@ class UserController extends Controller
                         'worker_name' => $user->name,
                         'email'       => $user->email,
                         'role'        => ucfirst($user->role),
-                        'status'      => 'Active',
+                        'is_active'   => $user->is_active ?? true,
+                        'status'      => ($user->is_active ?? true) ? 'Active' : 'Inactive',
                     ];
                 })->toArray();
         } else {
@@ -39,7 +41,8 @@ class UserController extends Controller
                         'patient_name' => $user->name,
                         'email'        => $user->email,
                         'phone'        => $user->phone_number ?? 'N/A',
-                        'status'       => 'Active',
+                        'is_active'    => $user->is_active ?? true,
+                        'status'       => ($user->is_active ?? true) ? 'Active' : 'Inactive',
                     ];
                 })->toArray();
         }
@@ -74,7 +77,6 @@ class UserController extends Controller
             'password_confirmation' => 'nullable|string',
         ]);
 
-        // Handle password separately
         if (!empty($validated['password'])) {
             $validated['password'] = bcrypt($validated['password']);
         } else {
@@ -82,8 +84,6 @@ class UserController extends Controller
         }
         unset($validated['password_confirmation']);
 
-        // Only include columns that actually exist in the DB
-        // This prevents crashes if a migration hasn't been run yet
         $safeData = [];
         foreach ($validated as $column => $value) {
             if (Schema::hasColumn('users', $column)) {
@@ -97,9 +97,48 @@ class UserController extends Controller
             ->with('success', 'User updated successfully!');
     }
 
+    /**
+     * Create a new worker/admin account (called by "Add Worker" modal).
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name'                  => 'required|string|max:255',
+            'email'                 => 'required|email|unique:users,email',
+            'password'              => 'required|string|min:8|confirmed',
+            'password_confirmation' => 'required|string',
+        ]);
+
+        User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'role'     => 'admin',
+        ]);
+
+        return redirect()->route('admin.users.index', ['tab' => 'workers'])
+            ->with('success', 'Worker account created successfully!');
+    }
+
+    /**
+     * Toggle is_active on a user account.
+     * Requires migration: add_is_active_to_users_table
+     */
     public function toggleStatus(User $user): RedirectResponse
     {
-        return redirect()->back()->with('info', 'Status toggle not yet implemented.');
+        if ($user->id === Auth::id()) {
+            return redirect()->back()->with('error', 'You cannot change your own account status.');
+        }
+
+        if (Schema::hasColumn('users', 'is_active')) {
+            $newStatus = ! ($user->is_active ?? true);
+            $user->update(['is_active' => $newStatus]);
+            $label = $newStatus ? 'activated' : 'deactivated';
+            return redirect()->back()->with('success', "Account {$label} successfully.");
+        }
+
+        return redirect()->back()
+            ->with('info', 'Run php artisan migrate to enable activate/deactivate.');
     }
 
     public function destroy(User $user): RedirectResponse

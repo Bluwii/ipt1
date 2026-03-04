@@ -3,7 +3,8 @@
 @section('title', 'User Management')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="{ showAddWorker: {{ $errors->any() && old('_from') === 'add_worker' ? 'true' : 'false' }} }">
+
     <!-- Page Header -->
     <div class="flex items-center justify-between">
         <h2 class="text-2xl font-bold text-gray-900">
@@ -11,6 +12,14 @@
         </h2>
 
         <div class="flex gap-3">
+            <!-- Add Worker button — only on Workers tab -->
+            @if($tab === 'workers')
+            <button @click="showAddWorker = true"
+                    class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                + Add Worker
+            </button>
+            @endif
+
             <!-- Search -->
             <div class="relative">
                 <input type="text"
@@ -23,6 +32,17 @@
             </div>
         </div>
     </div>
+
+    <!-- Validation errors (from Add Worker form) -->
+    @if($errors->any())
+    <div class="p-4 text-sm text-red-700 bg-red-100 border-l-4 border-red-500 rounded-lg">
+        <ul class="space-y-1 list-disc list-inside">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
 
     <!-- Tab Switcher -->
     <div class="flex border-b border-gray-200">
@@ -44,7 +64,7 @@
                     <tr>
                         <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">No.</th>
                         <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">
-                            {{ $tab === 'workers' ? "Worker Name" : "Patient Name" }}
+                            {{ $tab === 'workers' ? 'Worker Name' : 'Patient Name' }}
                         </th>
                         <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">Email Address</th>
                         @if($tab === 'workers')
@@ -70,27 +90,48 @@
                             <td class="px-4 py-3 text-sm text-gray-600">{{ $user['phone'] }}</td>
                         @endif
                         <td class="px-4 py-3 text-sm">
-                            <span class="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-200 rounded-full">
-                                {{ $user['status'] }}
-                            </span>
+                            @if($user['is_active'] ?? true)
+                                <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Active</span>
+                            @else
+                                <span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Inactive</span>
+                            @endif
                         </td>
                         <td class="px-4 py-3 text-sm">
                             <div class="flex items-center justify-center gap-2">
-                                <!-- View — uses real user ID -->
+                                <!-- View -->
                                 <a href="{{ route('admin.users.show', ['user' => $user['id']]) }}"
-                                   class="px-4 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
+                                   class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
                                     View
                                 </a>
 
-                                <!-- Delete — uses real user ID -->
+                                <!-- Activate / Deactivate -->
+                                <form method="POST"
+                                      action="{{ route('admin.users.toggle-status', ['user' => $user['id']]) }}"
+                                      class="inline">
+                                    @csrf @method('PATCH')
+                                    @if($user['is_active'] ?? true)
+                                        <button type="submit"
+                                                onclick="return confirm('Deactivate this account?')"
+                                                class="px-3 py-1.5 text-xs font-semibold text-white bg-yellow-500 rounded hover:bg-yellow-600">
+                                            Deactivate
+                                        </button>
+                                    @else
+                                        <button type="submit"
+                                                onclick="return confirm('Activate this account?')"
+                                                class="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700">
+                                            Activate
+                                        </button>
+                                    @endif
+                                </form>
+
+                                <!-- Delete -->
                                 <form method="POST"
                                       action="{{ route('admin.users.destroy', ['user' => $user['id']]) }}"
                                       class="inline"
-                                      onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
-                                    @csrf
-                                    @method('DELETE')
+                                      onsubmit="return confirm('Delete this user? This cannot be undone.')">
+                                    @csrf @method('DELETE')
                                     <button type="submit"
-                                            class="px-4 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700">
+                                            class="px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700">
                                         Delete
                                     </button>
                                 </form>
@@ -108,6 +149,72 @@
             </table>
         </div>
     </div>
+
+    <!-- ── Add Worker Modal ──────────────────────────────────────────────── -->
+    <div x-show="showAddWorker"
+         x-cloak
+         @click.self="showAddWorker = false"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+
+        <div class="w-full max-w-md p-8 mx-4 bg-white shadow-2xl rounded-2xl"
+             @click.stop>
+
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-gray-900">Add New Worker</h3>
+                <button @click="showAddWorker = false"
+                        class="p-2 text-gray-400 rounded-lg hover:text-gray-600 hover:bg-gray-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('admin.users.store') }}" class="space-y-4">
+                @csrf
+                <input type="hidden" name="_from" value="add_worker">
+
+                <div>
+                    <label class="block mb-1 text-sm font-semibold text-gray-700">Full Name <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" value="{{ old('name') }}" required
+                           class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                           placeholder="e.g. Maria Santos">
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-sm font-semibold text-gray-700">Email Address <span class="text-red-500">*</span></label>
+                    <input type="email" name="email" value="{{ old('email') }}" required
+                           class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                           placeholder="worker@example.com">
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-sm font-semibold text-gray-700">Password <span class="text-red-500">*</span></label>
+                    <input type="password" name="password" required minlength="8"
+                           class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                           placeholder="Minimum 8 characters">
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-sm font-semibold text-gray-700">Confirm Password <span class="text-red-500">*</span></label>
+                    <input type="password" name="password_confirmation" required
+                           class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                           placeholder="Re-enter password">
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" @click="showAddWorker = false"
+                            class="px-5 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                        Create Account
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
 <script>

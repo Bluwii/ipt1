@@ -33,6 +33,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/appointments/slots', [AppointmentController::class, 'slotAvailability'])->name('appointments.slots');
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
+    Route::get('/appointments/{appointment}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
+    Route::patch('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
     Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
 
