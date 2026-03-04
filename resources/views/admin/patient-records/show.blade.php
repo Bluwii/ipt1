@@ -259,7 +259,7 @@
 </div>
 
 <!-- Add Health Record Modal -->
-<div id="addRecordModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-50">
+<div id="addRecordModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between p-6 border-b border-gray-200">
             <h3 class="text-xl font-bold text-gray-900">Add Health Record</h3>

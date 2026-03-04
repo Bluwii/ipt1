@@ -177,7 +177,7 @@
         if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
 
         try {
-            const res = await fetch('{{ route("admin.data-records.monthly-data") }}', {
+            const res = await fetch('{{ route("admin.data-records.monthly") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

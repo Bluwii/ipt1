@@ -97,9 +97,6 @@ class UserController extends Controller
             ->with('success', 'User updated successfully!');
     }
 
-    /**
-     * Create a new worker/admin account (called by "Add Worker" modal).
-     */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
@@ -120,10 +117,6 @@ class UserController extends Controller
             ->with('success', 'Worker account created successfully!');
     }
 
-    /**
-     * Toggle is_active on a user account.
-     * Requires migration: add_is_active_to_users_table
-     */
     public function toggleStatus(User $user): RedirectResponse
     {
         if ($user->id === Auth::id()) {
@@ -137,8 +130,7 @@ class UserController extends Controller
             return redirect()->back()->with('success', "Account {$label} successfully.");
         }
 
-        return redirect()->back()
-            ->with('info', 'Run php artisan migrate to enable activate/deactivate.');
+        return redirect()->back()->with('info', 'Run php artisan migrate to enable activate/deactivate.');
     }
 
     public function destroy(User $user): RedirectResponse
