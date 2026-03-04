@@ -58,6 +58,7 @@
 
 <div class="min-h-screen py-8 mt-16 bg-gray-50">
     <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+
         <!-- Page Header -->
         <div class="flex flex-col items-start justify-between gap-4 mb-8 sm:flex-row sm:items-center">
             <div>
@@ -74,7 +75,8 @@
         </div>
 
         @if(session('success'))
-        <div class="p-4 mb-6 text-green-800 bg-green-100 border-l-4 border-green-500 rounded-lg shadow-sm" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)">
+        <div class="p-4 mb-6 text-green-800 bg-green-100 border-l-4 border-green-500 rounded-lg shadow-sm"
+             x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,6 +90,13 @@
                     </svg>
                 </button>
             </div>
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="p-4 mb-6 text-red-800 bg-red-100 border-l-4 border-red-500 rounded-lg shadow-sm"
+             x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)">
+            <span class="font-medium">{{ session('error') }}</span>
         </div>
         @endif
 
@@ -136,19 +145,32 @@
             </div>
         </div>
 
-        <!-- Upcoming Appointments Section -->
+        <!-- Upcoming Appointments -->
         <div class="mb-8">
             <h2 class="mb-6 text-2xl font-bold text-gray-900">Upcoming Appointments</h2>
+
             @if($upcomingAppointments->count() > 0)
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     @foreach($upcomingAppointments as $appointment)
+                        @php
+                            $isPending   = $appointment->status === 'pending';
+                            $borderColor = $appointment->service_type === 'checkup' ? 'border-blue-500'
+                                         : ($appointment->service_type === 'vaccine' ? 'border-green-500' : 'border-purple-500');
+                            $iconBg      = $appointment->service_type === 'checkup' ? 'bg-blue-100'
+                                         : ($appointment->service_type === 'vaccine' ? 'bg-green-100' : 'bg-purple-100');
+                            $iconColor   = $appointment->service_type === 'checkup' ? 'text-blue-600'
+                                         : ($appointment->service_type === 'vaccine' ? 'text-green-600' : 'text-purple-600');
+                        @endphp
+
                         <div class="overflow-hidden transition-all bg-white shadow-md rounded-xl hover:shadow-xl">
-                            <div class="p-6 border-l-4 {{ $appointment->service_type === 'checkup' ? 'border-blue-500' : ($appointment->service_type === 'vaccine' ? 'border-green-500' : 'border-purple-500') }}">
+                            <div class="p-6 border-l-4 {{ $borderColor }}">
+
+                                <!-- Header -->
                                 <div class="flex items-start justify-between mb-4">
                                     <div class="flex-1">
                                         <div class="flex items-center gap-3 mb-2">
-                                            <div class="p-2 {{ $appointment->service_type === 'checkup' ? 'bg-blue-100' : ($appointment->service_type === 'vaccine' ? 'bg-green-100' : 'bg-purple-100') }} rounded-lg">
-                                                <svg class="w-6 h-6 {{ $appointment->service_type === 'checkup' ? 'text-blue-600' : ($appointment->service_type === 'vaccine' ? 'text-green-600' : 'text-purple-600') }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <div class="p-2 {{ $iconBg }} rounded-lg">
+                                                <svg class="w-6 h-6 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                                 </svg>
                                             </div>
@@ -158,9 +180,13 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <span class="px-3 py-1 text-xs font-semibold {{ $appointment->status === 'confirmed' ? 'text-blue-800 bg-blue-100' : 'text-yellow-800 bg-yellow-100' }} rounded-full">{{ $appointment->status_label }}</span>
+                                    <span class="px-3 py-1 text-xs font-semibold rounded-full
+                                        {{ $appointment->status === 'confirmed' ? 'text-blue-800 bg-blue-100' : 'text-yellow-800 bg-yellow-100' }}">
+                                        {{ $appointment->status_label }}
+                                    </span>
                                 </div>
-                                
+
+                                <!-- Details -->
                                 <div class="space-y-3">
                                     <div class="flex items-center gap-3 text-sm text-gray-700">
                                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,30 +194,52 @@
                                         </svg>
                                         <span class="font-medium">{{ $appointment->appointment_date->format('F d, Y') }}</span>
                                     </div>
-                                    
                                     <div class="flex items-center gap-3 text-sm text-gray-700">
                                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
                                         <span>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A') }}</span>
                                     </div>
-                                    
                                     @if($appointment->notes)
                                     <div class="p-3 rounded-lg bg-gray-50">
                                         <p class="text-sm text-gray-600"><span class="font-medium">Notes:</span> {{ $appointment->notes }}</p>
                                     </div>
                                     @endif
                                 </div>
-                                
+
+                                <!-- Action Buttons -->
                                 <div class="flex gap-3 mt-6">
-                                    <form method="POST" action="{{ route('appointments.destroy', $appointment) }}" class="flex-1" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                                    @if($isPending)
+                                        {{-- Edit button — only for pending appointments --}}
+                                        <a href="{{ route('appointments.edit', $appointment) }}"
+                                           class="flex items-center justify-center flex-1 gap-2 px-4 py-2 text-sm font-medium text-blue-700 transition-colors border-2 border-blue-600 rounded-lg hover:bg-blue-50">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                            Edit
+                                        </a>
+                                    @endif
+
+                                    {{-- Cancel button --}}
+                                    <form method="POST" action="{{ route('appointments.destroy', $appointment) }}"
+                                          class="{{ $isPending ? 'flex-1' : 'w-full' }}"
+                                          onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-red-600 transition-colors border-2 border-red-600 rounded-lg hover:bg-red-50">
+                                        <button type="submit"
+                                                class="w-full px-4 py-2 text-sm font-medium text-red-600 transition-colors border-2 border-red-600 rounded-lg hover:bg-red-50">
                                             Cancel
                                         </button>
                                     </form>
                                 </div>
+
+                                {{-- Pending-only notice --}}
+                                @if($isPending)
+                                <p class="mt-2 text-xs text-center text-gray-400">
+                                    You can edit this appointment while it is still <span class="font-semibold">Pending</span>.
+                                </p>
+                                @endif
+
                             </div>
                         </div>
                     @endforeach
@@ -203,41 +251,47 @@
                     </svg>
                     <h3 class="mb-2 text-lg font-semibold text-gray-900">No Upcoming Appointments</h3>
                     <p class="mb-4 text-gray-600">You don't have any scheduled appointments yet.</p>
-                    <button @click="$dispatch('open-appointment-modal')" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                    <button onclick="window.dispatchEvent(new CustomEvent('open-appointment-modal'))"
+                            class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
                         Book Appointment
                     </button>
                 </div>
             @endif
         </div>
 
-        <!--Edit Upcoming Appointment-->
-        @if($appointment->status === 'pending')
-            <a href="{{ route('appointments.edit', $appointment) }}"
-            class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
-                Edit
-            </a>
-        @endif
-        <!-- Past Appointments Section -->
+        <!-- Past Appointments -->
         <div>
             <h2 class="mb-6 text-2xl font-bold text-gray-900">Past Appointments</h2>
             @if($pastAppointments->count() > 0)
                 <div class="p-6 bg-white shadow-md rounded-xl">
                     <div class="space-y-4">
                         @foreach($pastAppointments as $appointment)
-                            <div class="flex items-start justify-between p-4 transition-colors border-l-4 border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100">
+                            @php $ps = $appointment->status; @endphp
+                            <div class="flex items-start justify-between p-4 transition-colors rounded-lg bg-gray-50 hover:bg-gray-100 border-l-4
+                                {{ $ps === 'completed' ? 'border-green-400' : ($ps === 'cancelled' ? 'border-red-400' : 'border-gray-300') }}">
                                 <div class="flex gap-4">
-                                    <div class="p-2 bg-gray-200 rounded-lg h-fit">
-                                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="p-2 rounded-lg h-fit {{ $ps === 'completed' ? 'bg-green-100' : ($ps === 'cancelled' ? 'bg-red-100' : 'bg-gray-200') }}">
+                                        <svg class="w-6 h-6 {{ $ps === 'completed' ? 'text-green-600' : ($ps === 'cancelled' ? 'text-red-500' : 'text-gray-600') }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                         </svg>
                                     </div>
                                     <div class="flex-1">
                                         <h3 class="font-semibold text-gray-900">{{ $appointment->service_type_label }}</h3>
                                         <p class="text-sm text-gray-600">{{ $appointment->full_name }}</p>
-                                        <p class="mt-2 text-sm text-gray-500">{{ $appointment->appointment_date->format('F d, Y') }} • {{ \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A') }}</p>
+                                        <p class="mt-2 text-sm text-gray-500">
+                                            {{ $appointment->appointment_date->format('F d, Y') }} •
+                                            {{ \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A') }}
+                                        </p>
                                     </div>
                                 </div>
-                                <span class="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-200 rounded-full">{{ $appointment->status_label }}</span>
+                                @php $ps = $appointment->status; @endphp
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full
+                                    {{ $ps === 'completed' ? 'bg-green-100 text-green-700'
+                                    : ($ps === 'cancelled' ? 'bg-red-100 text-red-700'
+                                    : ($ps === 'confirmed' ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-yellow-100 text-yellow-700')) }}">
+                                    {{ $appointment->status_label }}
+                                </span>
                             </div>
                         @endforeach
                     </div>
