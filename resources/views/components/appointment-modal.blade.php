@@ -1,10 +1,53 @@
-<!-- resources/views/components/appointment-modal.blade.php -->
+{{-- resources/views/components/appointment-modal.blade.php --}}
+
+@php
+// Service sub-options — must match Appointment::serviceOptions()
+$serviceOptions = [
+    'checkup' => [
+        'General Check-up',
+        'Prenatal Check-up',
+        'Child Health / IMCI',
+        'Family Planning Consultation',
+        'Senior Citizen Check-up',
+        'Blood Pressure Monitoring',
+        'Blood Sugar Monitoring',
+        'Postpartum Check-up',
+        'TB DOTS Consultation',
+    ],
+    'vaccine' => [
+        'BCG Vaccine',
+        'Hepatitis B Vaccine',
+        'OPV / IPV (Polio)',
+        'Pentavalent Vaccine (DPT-HepB-Hib)',
+        'Measles-Rubella (MR) Vaccine',
+        'HPV Vaccine',
+        'Influenza Vaccine',
+        'Tetanus Toxoid (TT)',
+        'COVID-19 Vaccine',
+        'PCV (Pneumococcal) Vaccine',
+    ],
+    'medicine' => [
+        'Paracetamol',
+        'Amoxicillin',
+        'Mefenamic Acid',
+        'Cetirizine (Antihistamine)',
+        'Amlodipine (Hypertension)',
+        'Metformin (Diabetes)',
+        'Ferrous Sulfate (Iron Supplement)',
+        'Vitamin A',
+        'Vitamin B Complex',
+        'Multivitamins',
+        'ORS (Oral Rehydration Salts)',
+    ],
+];
+@endphp
+
 <div x-data="appointmentModal()" x-show="open" x-cloak
      class="fixed inset-0 z-50 overflow-y-auto"
      @open-appointment-modal.window="openModal()"
      @keydown.escape.window="closeModal()">
 
-    <!-- Backdrop -->
+    {{-- Backdrop --}}
     <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
          @click="closeModal()"
          x-show="open"
@@ -16,7 +59,6 @@
          x-transition:leave-end="opacity-0">
     </div>
 
-    <!-- Modal Container -->
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
         <div class="relative inline-block w-full max-w-5xl overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl"
              x-show="open"
@@ -27,17 +69,17 @@
              x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
 
-            <!-- Header with Close Button -->
+            {{-- Header --}}
             <div class="flex items-center justify-between p-6 border-b border-gray-200">
                 <h2 class="text-2xl font-bold text-gray-900">Schedule Appointment</h2>
                 <button @click="closeModal()" class="p-2 text-gray-400 transition-colors rounded-lg hover:text-gray-600 hover:bg-gray-100">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
 
-            <!-- Progress Indicator -->
+            {{-- Progress --}}
             <div class="px-6 pt-4 pb-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center" :class="step >= 1 ? 'text-blue-600' : 'text-gray-400'">
@@ -66,15 +108,17 @@
                 </div>
             </div>
 
-            <!-- Modal Content -->
+            {{-- Modal Content --}}
             <div class="p-6 overflow-y-auto max-h-[calc(100vh-250px)]">
 
-                <!-- ══════════════ STEP 1: Service ══════════════ -->
+                {{-- ══ STEP 1: Service Type + Specific Service ══ --}}
                 <div x-show="step === 1" x-transition>
                     <h2 class="mb-6 text-2xl font-bold text-center text-gray-900">Choose a Service</h2>
 
+                    {{-- Service Type Cards --}}
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-                        <!-- Check Up -->
+
+                        {{-- Check Up --}}
                         <button @click="selectService('checkup')" type="button"
                                 class="relative p-6 text-center transition-all border-2 rounded-xl"
                                 :class="selectedService === 'checkup' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'">
@@ -84,16 +128,17 @@
                                 </div>
                             </div>
                             <h3 class="text-xl font-bold text-gray-900">Check Up</h3>
+                            <p class="mt-1 text-sm text-gray-500">Consultations & monitoring</p>
                             <div x-show="selectedService === 'checkup'" class="absolute top-4 right-4">
                                 <div class="flex items-center justify-center w-6 h-6 text-white bg-blue-600 rounded-full">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                                     </svg>
                                 </div>
                             </div>
                         </button>
 
-                        <!-- Vaccine -->
+                        {{-- Vaccine --}}
                         <button @click="selectService('vaccine')" type="button"
                                 class="relative p-6 text-center transition-all border-2 rounded-xl"
                                 :class="selectedService === 'vaccine' ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-red-300'">
@@ -103,16 +148,17 @@
                                 </div>
                             </div>
                             <h3 class="text-xl font-bold text-gray-900">Vaccine</h3>
+                            <p class="mt-1 text-sm text-gray-500">Immunization services</p>
                             <div x-show="selectedService === 'vaccine'" class="absolute top-4 right-4">
                                 <div class="flex items-center justify-center w-6 h-6 text-white bg-red-600 rounded-full">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                                     </svg>
                                 </div>
                             </div>
                         </button>
 
-                        <!-- Request Medicine -->
+                        {{-- Request Medicine --}}
                         <button @click="selectService('medicine')" type="button"
                                 class="relative p-6 text-center transition-all border-2 rounded-xl"
                                 :class="selectedService === 'medicine' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'">
@@ -122,56 +168,123 @@
                                 </div>
                             </div>
                             <h3 class="text-xl font-bold text-gray-900">Request Medicine</h3>
+                            <p class="mt-1 text-sm text-gray-500">Medication assistance</p>
                             <div x-show="selectedService === 'medicine'" class="absolute top-4 right-4">
                                 <div class="flex items-center justify-center w-6 h-6 text-white bg-purple-600 rounded-full">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                                     </svg>
                                 </div>
                             </div>
                         </button>
                     </div>
 
+                    {{-- ── Specific Service Dropdown (appears after selecting a type) ── --}}
+                    <div x-show="selectedService" x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+                         class="mt-6">
+
+                        <div class="p-5 border-2 rounded-xl"
+                             :class="{
+                                 'border-blue-200 bg-blue-50':   selectedService === 'checkup',
+                                 'border-red-200 bg-red-50':     selectedService === 'vaccine',
+                                 'border-purple-200 bg-purple-50': selectedService === 'medicine'
+                             }">
+
+                            <label class="block mb-2 text-sm font-bold"
+                                   :class="{
+                                       'text-blue-800':   selectedService === 'checkup',
+                                       'text-red-800':    selectedService === 'vaccine',
+                                       'text-purple-800': selectedService === 'medicine'
+                                   }">
+                                <span x-show="selectedService === 'checkup'">Select Consultation Type <span class="text-red-500">*</span></span>
+                                <span x-show="selectedService === 'vaccine'">Select Vaccine <span class="text-red-500">*</span></span>
+                                <span x-show="selectedService === 'medicine'">Select Medicine Needed <span class="text-red-500">*</span></span>
+                            </label>
+
+                            <select x-model="specificService"
+                                    class="w-full px-4 py-3 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                                    :class="{
+                                        'focus:ring-blue-500':   selectedService === 'checkup',
+                                        'focus:ring-red-500':    selectedService === 'vaccine',
+                                        'focus:ring-purple-500': selectedService === 'medicine'
+                                    }">
+                                <option class="hidden"value="">-- Please select --</option>
+
+                                {{-- Check Up options --}}
+                                <template x-if="selectedService === 'checkup'">
+                                    <template x-for="opt in serviceOptions.checkup" :key="opt">
+                                        <option :value="opt" x-text="opt"></option>
+                                    </template>
+                                </template>
+
+                                {{-- Vaccine options --}}
+                                <template x-if="selectedService === 'vaccine'">
+                                    <template x-for="opt in serviceOptions.vaccine" :key="opt">
+                                        <option :value="opt" x-text="opt"></option>
+                                    </template>
+                                </template>
+
+                                {{-- Medicine options --}}
+                                <template x-if="selectedService === 'medicine'">
+                                    <template x-for="opt in serviceOptions.medicine" :key="opt">
+                                        <option :value="opt" x-text="opt"></option>
+                                    </template>
+                                </template>
+                            </select>
+
+                            {{-- Preview of what was selected --}}
+                            <div x-show="specificService" class="flex items-center gap-2 mt-3">
+                                <svg class="flex-shrink-0 w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <p class="text-sm font-medium text-gray-700">
+                                    Selected: <span class="font-semibold" x-text="specificService"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex justify-end mt-6">
-                        <button @click="nextStep()" :disabled="!selectedService"
+                        <button @click="nextStep()" :disabled="!selectedService || !specificService"
                                 class="px-6 py-3 font-semibold text-white transition-colors bg-blue-600 rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-blue-700">
                             Continue
                         </button>
                     </div>
                 </div>
 
-                <!-- ══════════════ STEP 2: Date + Time Slots ══════════════ -->
+                {{-- ══ STEP 2: Date + Time Slots (unchanged) ══ --}}
                 <div x-show="step === 2" x-transition>
                     <h2 class="mb-6 text-2xl font-bold text-center text-gray-900">Select Date and Time</h2>
 
-                    <!-- Date Picker + Refresh row -->
+                    {{-- Selected service summary --}}
+                    <div class="flex items-center gap-3 p-3 mb-5 text-sm border border-gray-200 rounded-lg bg-gray-50">
+                        <span class="text-gray-500">Service:</span>
+                        <span class="font-semibold text-gray-800"
+                              x-text="selectedService === 'checkup' ? 'Check Up' : (selectedService === 'vaccine' ? 'Vaccine' : 'Request Medicine')"></span>
+                        <span class="text-gray-400">→</span>
+                        <span class="font-semibold text-blue-700" x-text="specificService"></span>
+                    </div>
+
                     <div class="flex flex-wrap items-end gap-3 mb-6">
                         <div>
                             <label class="block mb-2 text-sm font-semibold text-gray-700">Select Date</label>
-                            <input type="date"
-                                   x-model="selectedDate"
-                                   @change="fetchSlots()"
-                                   :min="minDate()"
+                            <input type="date" x-model="selectedDate" @change="fetchSlots()" :min="minDate()"
                                    class="block px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500">
                         </div>
-                        <!-- Refresh button — only shown when slots are loaded -->
-                        <button x-show="slots.length > 0 && !loadingSlots"
-                                @click="fetchSlots()"
-                                type="button"
-                                class="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-blue-700 transition-colors border border-blue-300 rounded-lg bg-blue-50 hover:bg-blue-100">
+                        <button x-show="slots.length > 0 && !loadingSlots" @click="fetchSlots()" type="button"
+                                class="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-blue-700 border border-blue-300 rounded-lg bg-blue-50 hover:bg-blue-100">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                             </svg>
                             Refresh
                         </button>
                     </div>
 
-                    <!-- Legend -->
                     <div x-show="selectedDate" class="flex flex-wrap items-center gap-5 mb-5 text-xs">
                         <div class="flex items-center gap-1.5">
                             <div class="w-4 h-4 bg-green-100 border-2 border-green-500 rounded"></div>
-                            <span class="text-gray-600">Available slots</span>
+                            <span class="text-gray-600">Available</span>
                         </div>
                         <div class="flex items-center gap-1.5">
                             <div class="w-4 h-4 bg-blue-600 border-2 border-blue-600 rounded"></div>
@@ -179,115 +292,55 @@
                         </div>
                         <div class="flex items-center gap-1.5">
                             <div class="w-4 h-4 border-2 border-red-300 rounded bg-red-50"></div>
-                            <span class="text-gray-600">Full — no slots left</span>
+                            <span class="text-gray-600">Full</span>
                         </div>
                     </div>
 
-                    <!-- Loading spinner -->
                     <div x-show="loadingSlots" class="flex items-center justify-center py-10">
                         <div class="w-8 h-8 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
                         <span class="ml-3 text-sm text-gray-600">Checking availability…</span>
                     </div>
 
-                    <!-- Prompt when no date selected -->
                     <div x-show="!selectedDate && !loadingSlots" class="py-10 text-center text-gray-400">
                         <svg class="w-12 h-12 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        <p class="text-sm">Select a date above to see available time slots.</p>
+                        <p class="text-sm">Select a date to see available time slots.</p>
                     </div>
 
-                    <!-- ── Time Slot Cards ── -->
-                    <div x-show="slots.length > 0 && !loadingSlots"
-                         class="grid grid-cols-1 gap-4 sm:grid-cols-5">
+                    <div x-show="slots.length > 0 && !loadingSlots" class="grid grid-cols-1 gap-4 sm:grid-cols-5">
                         <template x-for="slot in slots" :key="slot.hour">
-                            <button
-                                @click="selectSlot(slot)"
-                                type="button"
-                                :disabled="slot.is_full"
-                                class="relative flex flex-col items-center justify-center p-5 transition-all duration-200 border-2 rounded-xl focus:outline-none"
-                                :class="{
-                                    'border-blue-600 bg-blue-600 text-white shadow-lg scale-105':
-                                        selectedTime === slot.time_value,
-                                    'border-green-400 bg-green-50 text-green-900 hover:border-green-600 hover:bg-green-100 cursor-pointer':
-                                        !slot.is_full && selectedTime !== slot.time_value,
-                                    'border-red-200 bg-red-50 text-red-400 cursor-not-allowed':
-                                        slot.is_full
-                                }">
-
-                                <!-- Hour label -->
+                            <button @click="selectSlot(slot)" type="button" :disabled="slot.is_full"
+                                    class="relative flex flex-col items-center justify-center p-5 transition-all duration-200 border-2 rounded-xl focus:outline-none"
+                                    :class="{
+                                        'border-blue-600 bg-blue-600 text-white shadow-lg scale-105': selectedTime === slot.time_value,
+                                        'border-green-400 bg-green-50 text-green-900 hover:border-green-600 hover:bg-green-100 cursor-pointer': !slot.is_full && selectedTime !== slot.time_value,
+                                        'border-red-200 bg-red-50 text-red-400 cursor-not-allowed': slot.is_full
+                                    }">
                                 <span class="text-lg font-bold leading-tight" x-text="slot.label"></span>
-
-                                <!-- Visual progress bar -->
                                 <div class="w-full mt-3 mb-2 bg-gray-200 rounded-full h-1.5 overflow-hidden"
                                      :class="{'bg-blue-300': selectedTime === slot.time_value, 'bg-red-100': slot.is_full}">
                                     <div class="h-1.5 rounded-full transition-all duration-300"
-                                         :class="{
-                                             'bg-white':       selectedTime === slot.time_value,
-                                             'bg-green-500':   !slot.is_full && selectedTime !== slot.time_value,
-                                             'bg-red-400':     slot.is_full
-                                         }"
+                                         :class="{'bg-white': selectedTime === slot.time_value, 'bg-green-500': !slot.is_full && selectedTime !== slot.time_value, 'bg-red-400': slot.is_full}"
                                          :style="`width: ${(slot.booked / 10) * 100}%`">
                                     </div>
                                 </div>
-
-                                <!-- Booked / available counts -->
                                 <div class="flex items-center justify-between w-full text-xs font-medium">
-                                    <span :class="{
-                                              'text-blue-100':  selectedTime === slot.time_value,
-                                              'text-gray-500':  !slot.is_full && selectedTime !== slot.time_value,
-                                              'text-red-400':   slot.is_full
-                                          }">
+                                    <span :class="{'text-blue-100': selectedTime === slot.time_value, 'text-gray-500': !slot.is_full && selectedTime !== slot.time_value, 'text-red-400': slot.is_full}">
                                         <span x-text="slot.booked"></span> taken
                                     </span>
-                                    <span :class="{
-                                              'text-white font-bold':   selectedTime === slot.time_value && !slot.is_full,
-                                              'text-green-700 font-bold': !slot.is_full && selectedTime !== slot.time_value,
-                                              'text-red-400':            slot.is_full
-                                          }">
+                                    <span :class="{'text-white font-bold': selectedTime === slot.time_value && !slot.is_full, 'text-green-700 font-bold': !slot.is_full && selectedTime !== slot.time_value, 'text-red-400': slot.is_full}">
                                         <span x-text="slot.available"></span> left
                                     </span>
                                 </div>
-
-                                <!-- FULL badge -->
-                                <span x-show="slot.is_full"
-                                      class="mt-2 px-2 py-0.5 text-xs font-bold text-red-600 bg-red-100 rounded-full">
-                                    FULL
-                                </span>
-
-                                <!-- Selected checkmark -->
-                                <span x-show="selectedTime === slot.time_value && !slot.is_full"
-                                      class="absolute top-2 right-2">
+                                <span x-show="slot.is_full" class="mt-2 px-2 py-0.5 text-xs font-bold text-red-600 bg-red-100 rounded-full">FULL</span>
+                                <span x-show="selectedTime === slot.time_value && !slot.is_full" class="absolute top-2 right-2">
                                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                                     </svg>
                                 </span>
                             </button>
                         </template>
-                    </div>
-
-                    <!-- Note about live counts -->
-                    <div x-show="slots.length > 0 && !loadingSlots"
-                         class="flex items-center justify-between mt-4 text-xs text-gray-400">
-                        <span>
-                            Slot counts are live.
-                            <span x-show="lastUpdated">Last updated: <span x-text="lastUpdated"></span></span>
-                        </span>
-                        <!-- Flash indicator when silent refresh fires -->
-                        <span x-show="justUpdated"
-                              x-transition:enter="transition ease-out duration-200"
-                              x-transition:enter-start="opacity-0 scale-90"
-                              x-transition:enter-end="opacity-100 scale-100"
-                              x-transition:leave="transition ease-in duration-500"
-                              x-transition:leave-start="opacity-100"
-                              x-transition:leave-end="opacity-0"
-                              class="flex items-center gap-1 px-2 py-0.5 text-green-700 bg-green-100 rounded-full font-semibold">
-                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            Updated
-                        </span>
                     </div>
 
                     <div class="flex justify-between mt-8">
@@ -302,13 +355,12 @@
                     </div>
                 </div>
 
-                <!-- ══════════════ STEP 3: Patient Details ══════════════ -->
+                {{-- ══ STEP 3: Patient Details (unchanged except summary) ══ --}}
                 <div x-show="step === 3" x-transition>
                     <h2 class="mb-6 text-2xl font-bold text-center text-gray-900">Patient Details</h2>
 
                     <form @submit.prevent="submitAppointment()">
                         <div class="space-y-4">
-                            <!-- Row 1: Name -->
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                                 <div>
                                     <label class="block mb-2 text-sm font-semibold text-gray-700">First Name <span class="text-red-600">*</span></label>
@@ -327,26 +379,18 @@
                                 </div>
                             </div>
 
-                            <!-- Row 2: Birthdate / Age / Gender -->
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                                 <div>
                                     <label class="block mb-2 text-sm font-semibold text-gray-700">Birthdate <span class="text-red-600">*</span></label>
-                                    <input type="date" x-model="formData.birthdate"
-                                           @change="calcAge()"
-                                           required
+                                    <input type="date" x-model="formData.birthdate" @change="calcAge()" required
                                            class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500">
                                 </div>
                                 <div>
                                     <label class="block mb-2 text-sm font-semibold text-gray-700">Age <span class="text-red-600">*</span></label>
                                     <div class="relative">
                                         <input type="number" x-model="formData.age" required min="0" max="120" readonly
-                                               class="block w-full px-4 py-3 border border-gray-300 rounded-lg cursor-not-allowed bg-gray-50 focus:ring-0"
-                                               placeholder="Auto-filled from birthdate">
-                                        <!-- Minor badge shown inside the age field -->
-                                        <span x-show="isMinor()"
-                                              class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">
-                                            Minor
-                                        </span>
+                                               class="block w-full px-4 py-3 border border-gray-300 rounded-lg cursor-not-allowed bg-gray-50 focus:ring-0">
+                                        <span x-show="isMinor()" class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">Minor</span>
                                     </div>
                                 </div>
                                 <div>
@@ -361,54 +405,31 @@
                                 </div>
                             </div>
 
-                            <!-- ── Minor Notice Banner ── -->
-                            <div x-show="isMinor()"
-                                 x-transition:enter="transition ease-out duration-300"
-                                 x-transition:enter-start="opacity-0 -translate-y-2"
-                                 x-transition:enter-end="opacity-100 translate-y-0"
-                                 class="flex items-start gap-3 p-4 border rounded-lg bg-amber-50 border-amber-300">
+                            {{-- Minor notice --}}
+                            <div x-show="isMinor()" x-transition class="flex items-start gap-3 p-4 border rounded-lg bg-amber-50 border-amber-300">
                                 <svg class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                                 </svg>
                                 <div>
                                     <p class="text-sm font-semibold text-amber-800">Patient is a Minor (under 18)</p>
-                                    <p class="text-xs text-amber-700 mt-0.5">A parent or legal guardian must be present at the appointment. Please complete the guardian information below.</p>
+                                    <p class="text-xs text-amber-700 mt-0.5">A parent or legal guardian must be present. Please complete the guardian information below.</p>
                                 </div>
                             </div>
 
-                            <!-- ── Guardian / Parent Information (only for minors) ── -->
-                            <div x-show="isMinor()"
-                                 x-transition:enter="transition ease-out duration-300"
-                                 x-transition:enter-start="opacity-0"
-                                 x-transition:enter-end="opacity-100"
-                                 class="p-5 space-y-4 border-2 bg-amber-50 border-amber-200 rounded-xl">
-
+                            {{-- Guardian fields --}}
+                            <div x-show="isMinor()" x-transition class="p-5 space-y-4 border-2 bg-amber-50 border-amber-200 rounded-xl">
                                 <div class="flex items-center gap-2 mb-1">
-                                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/>
-                                    </svg>
                                     <h3 class="text-sm font-bold tracking-wide uppercase text-amber-800">Parent / Guardian Information</h3>
                                 </div>
-
-                                <!-- Guardian name + relationship -->
                                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                     <div>
-                                        <label class="block mb-2 text-sm font-semibold text-gray-700">
-                                            Guardian Full Name <span class="text-red-600">*</span>
-                                        </label>
-                                        <input type="text" x-model="formData.guardianName"
-                                               :required="isMinor()"
-                                               class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-amber-400 focus:ring-amber-400"
-                                               placeholder="e.g. Maria Santos">
+                                        <label class="block mb-2 text-sm font-semibold text-gray-700">Guardian Full Name <span class="text-red-600">*</span></label>
+                                        <input type="text" x-model="formData.guardianName" :required="isMinor()"
+                                               class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-amber-400 focus:ring-amber-400">
                                     </div>
                                     <div>
-                                        <label class="block mb-2 text-sm font-semibold text-gray-700">
-                                            Relationship <span class="text-red-600">*</span>
-                                        </label>
-                                        <select x-model="formData.guardianRelationship"
-                                                :required="isMinor()"
+                                        <label class="block mb-2 text-sm font-semibold text-gray-700">Relationship <span class="text-red-600">*</span></label>
+                                        <select x-model="formData.guardianRelationship" :required="isMinor()"
                                                 class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-amber-400 focus:ring-amber-400">
                                             <option value="">Select Relationship</option>
                                             <option value="mother">Mother</option>
@@ -417,31 +438,21 @@
                                         </select>
                                     </div>
                                 </div>
-
-                                <!-- Guardian contact -->
                                 <div>
-                                    <label class="block mb-2 text-sm font-semibold text-gray-700">
-                                        Guardian Contact Number <span class="text-red-600">*</span>
-                                    </label>
-                                    <input type="tel" x-model="formData.guardianContact"
-                                           :required="isMinor()"
-                                           class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-amber-400 focus:ring-amber-400"
-                                           placeholder="e.g. 09XX-XXX-XXXX">
+                                    <label class="block mb-2 text-sm font-semibold text-gray-700">Guardian Contact Number <span class="text-red-600">*</span></label>
+                                    <input type="tel" x-model="formData.guardianContact" :required="isMinor()"
+                                           class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-amber-400 focus:ring-amber-400">
                                 </div>
-
-                                <!-- Guardian consent checkbox -->
                                 <div class="flex items-start gap-3 p-3 bg-white border rounded-lg border-amber-200">
-                                    <input type="checkbox" x-model="formData.guardianConsent"
-                                           :required="isMinor()"
+                                    <input type="checkbox" x-model="formData.guardianConsent" :required="isMinor()"
                                            class="w-4 h-4 mt-1 rounded text-amber-500 border-amber-300 focus:ring-amber-400">
                                     <label class="text-sm text-gray-700">
                                         <span class="font-semibold text-amber-800">I, the parent/guardian, give my consent</span>
-                                        to this appointment and confirm that I will be personally present at the health center on the scheduled date.
+                                        to this appointment and confirm I will be present at the health center.
                                     </label>
                                 </div>
                             </div>
 
-                            <!-- Row 3: Email / Phone -->
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
                                     <label class="block mb-2 text-sm font-semibold text-gray-700">Email <span class="text-red-600">*</span></label>
@@ -455,7 +466,6 @@
                                 </div>
                             </div>
 
-                            <!-- Row 4: Purok -->
                             <div>
                                 <label class="block mb-2 text-sm font-semibold text-gray-700">Purok No. <span class="text-red-600">*</span></label>
                                 <select x-model="formData.purokNo" required
@@ -470,23 +480,24 @@
                                 </select>
                             </div>
 
-                            <!-- Notes -->
                             <div>
                                 <label class="block mb-2 text-sm font-semibold text-gray-700">Additional Notes (Optional)</label>
                                 <textarea x-model="formData.notes" rows="3" maxlength="500"
                                           class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500"
-                                          placeholder="Please provide any additional information…"></textarea>
+                                          placeholder="Any additional information…"></textarea>
                             </div>
 
-                            <!-- Appointment summary -->
+                            {{-- Booking summary --}}
                             <div class="p-4 text-sm text-blue-800 border border-blue-200 rounded-lg bg-blue-50">
-                                <p class="mb-1 font-semibold">Booking Summary</p>
-                                <p>Service: <span class="font-medium" x-text="selectedService === 'checkup' ? 'Check Up' : (selectedService === 'vaccine' ? 'Vaccine' : 'Request Medicine')"></span></p>
-                                <p>Date: <span class="font-medium" x-text="selectedDate"></span></p>
-                                <p>Time: <span class="font-medium" x-text="slots.find(s => s.time_value === selectedTime)?.label || selectedTime"></span></p>
+                                <p class="mb-2 font-semibold">Booking Summary</p>
+                                <div class="space-y-1">
+                                    <p>Service: <span class="font-medium" x-text="selectedService === 'checkup' ? 'Check Up' : (selectedService === 'vaccine' ? 'Vaccine' : 'Request Medicine')"></span></p>
+                                    <p>Specific: <span class="font-medium text-blue-700" x-text="specificService"></span></p>
+                                    <p>Date: <span class="font-medium" x-text="selectedDate"></span></p>
+                                    <p>Time: <span class="font-medium" x-text="slots.find(s => s.time_value === selectedTime)?.label || selectedTime"></span></p>
+                                </div>
                             </div>
 
-                            <!-- Terms -->
                             <div class="flex items-start">
                                 <input type="checkbox" x-model="agreedToTerms" required
                                        class="w-4 h-4 mt-1 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
@@ -509,7 +520,7 @@
                     </form>
                 </div>
 
-            </div><!-- end modal content -->
+            </div>{{-- end modal content --}}
         </div>
     </div>
 </div>
@@ -520,6 +531,7 @@ function appointmentModal() {
         open:            false,
         step:            1,
         selectedService: '',
+        specificService: '',  // ← NEW
         selectedDate:    '',
         selectedTime:    '',
         agreedToTerms:   false,
@@ -529,35 +541,37 @@ function appointmentModal() {
         lastUpdated:     null,
         justUpdated:     false,
 
+        // ── Service options (mirrors Appointment::serviceOptions()) ──
+        serviceOptions: {
+            checkup: @json(\App\Models\Appointment::serviceOptions()['checkup']),
+            vaccine: @json(\App\Models\Appointment::serviceOptions()['vaccine']),
+            medicine: @json(\App\Models\Appointment::serviceOptions()['medicine']),
+        },
+
         formData: {
-            firstName:              '{{ Auth::user()->name ?? "" }}',
-            middleInitial:          '',
-            lastName:               '',
-            birthdate:              '',
-            age:                    '',
-            gender:                 '',
-            email:                  '{{ Auth::user()->email ?? "" }}',
-            phoneNumber:            '',
-            purokNo:                '',
-            notes:                  '',
-            // Guardian fields (only used when patient is a minor)
-            guardianName:           '',
-            guardianRelationship:   '',
-            guardianContact:        '',
-            guardianConsent:        false,
+            firstName:            '{{ Auth::user()->name ?? "" }}',
+            middleInitial:        '',
+            lastName:             '',
+            birthdate:            '',
+            age:                  '',
+            gender:               '',
+            email:                '{{ Auth::user()->email ?? "" }}',
+            phoneNumber:          '',
+            purokNo:              '',
+            notes:                '',
+            guardianName:         '',
+            guardianRelationship: '',
+            guardianContact:      '',
+            guardianConsent:      false,
         },
 
         minDate() {
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            return tomorrow.toISOString().split('T')[0];
+            const t = new Date();
+            t.setDate(t.getDate() + 1);
+            return t.toISOString().split('T')[0];
         },
 
-        openModal() {
-            this.open = true;
-            document.body.style.overflow = 'hidden';
-        },
-
+        openModal()  { this.open = true; document.body.style.overflow = 'hidden'; },
         closeModal() {
             this._stopPolling();
             this.open = false;
@@ -569,6 +583,7 @@ function appointmentModal() {
             this._stopPolling();
             this.step            = 1;
             this.selectedService = '';
+            this.specificService = '';   // ← reset
             this.selectedDate    = '';
             this.selectedTime    = '';
             this.agreedToTerms   = false;
@@ -594,10 +609,11 @@ function appointmentModal() {
             };
         },
 
-        // Select a service in Step 1
-        selectService(service) { this.selectedService = service; },
+        selectService(service) {
+            this.selectedService = service;
+            this.specificService = '';  // ← clear when switching service type
+        },
 
-        // Auto-calculate age from birthdate
         calcAge() {
             if (!this.formData.birthdate) return;
             const today = new Date();
@@ -606,8 +622,6 @@ function appointmentModal() {
             const m = today.getMonth() - dob.getMonth();
             if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
             this.formData.age = age >= 0 ? age : '';
-
-            // Clear guardian fields if patient is no longer a minor
             if (!this.isMinor()) {
                 this.formData.guardianName         = '';
                 this.formData.guardianRelationship = '';
@@ -616,7 +630,6 @@ function appointmentModal() {
             }
         },
 
-        // Returns true if the currently-entered age is under 18
         isMinor() {
             const age = parseInt(this.formData.age, 10);
             return !isNaN(age) && age < 18;
@@ -625,7 +638,6 @@ function appointmentModal() {
         nextStep() {
             if (this.step < 3) {
                 this.step++;
-                // Start polling when entering Step 2
                 if (this.step === 2) this._startPolling();
             }
         },
@@ -638,42 +650,29 @@ function appointmentModal() {
         },
 
         _startPolling() {
-            this._stopPolling(); // clear any existing timer
-            // Poll every 20 seconds silently
+            this._stopPolling();
             this._pollInterval = setInterval(() => {
-                if (this.selectedDate && this.step === 2) {
-                    this._silentRefresh();
-                }
+                if (this.selectedDate && this.step === 2) this._silentRefresh();
             }, 20000);
         },
 
         _stopPolling() {
-            if (this._pollInterval) {
-                clearInterval(this._pollInterval);
-                this._pollInterval = null;
-            }
+            if (this._pollInterval) { clearInterval(this._pollInterval); this._pollInterval = null; }
         },
 
-        // Silent refresh — updates counts without resetting selected slot or showing spinner
         async _silentRefresh() {
             if (!this.selectedDate) return;
             try {
-                const res = await fetch(
-                    `{{ route('appointments.slots') }}?date=${this.selectedDate}`,
-                    { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }
-                );
-                if (!res.ok) return;
-                const data = await res.json();
-                const fresh = data.slots || [];
-
-                // Merge counts into existing slots so UI updates in place
-                this.slots = this.slots.map(existing => {
-                    const updated = fresh.find(s => s.hour === existing.hour);
-                    if (!updated) return existing;
-                    return { ...existing, booked: updated.booked, available: updated.available, is_full: updated.is_full };
+                const res  = await fetch(`{{ route('appointments.slots') }}?date=${this.selectedDate}`, {
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
                 });
-
-                // If the selected slot just became full, deselect it and warn
+                if (!res.ok) return;
+                const data  = await res.json();
+                const fresh = data.slots || [];
+                this.slots  = this.slots.map(e => {
+                    const u = fresh.find(s => s.hour === e.hour);
+                    return u ? { ...e, booked: u.booked, available: u.available, is_full: u.is_full } : e;
+                });
                 if (this.selectedTime) {
                     const chosen = this.slots.find(s => s.time_value === this.selectedTime);
                     if (chosen && chosen.is_full) {
@@ -681,37 +680,24 @@ function appointmentModal() {
                         alert('⚠️ The slot you selected just became fully booked. Please choose another time.');
                     }
                 }
-
-                // Flash the "just updated" indicator for 2 s
                 this.lastUpdated = new Date().toLocaleTimeString();
                 this.justUpdated = true;
                 setTimeout(() => { this.justUpdated = false; }, 2000);
-
-            } catch (e) { /* silent fail — network blip */ }
+            } catch (e) { /* silent */ }
         },
 
-        // Full fetch — used when date changes (shows spinner, resets selection)
         async fetchSlots() {
             if (!this.selectedDate) return;
-
             this.loadingSlots = true;
             this.selectedTime = '';
             this.slots        = [];
-
             try {
-                const res = await fetch(
-                    `{{ route('appointments.slots') }}?date=${this.selectedDate}`,
-                    {
-                        headers: {
-                            'Accept':        'application/json',
-                            'X-CSRF-TOKEN':  '{{ csrf_token() }}'
-                        }
-                    }
-                );
-
+                const res  = await fetch(`{{ route('appointments.slots') }}?date=${this.selectedDate}`, {
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                });
                 if (!res.ok) throw new Error('Server error');
-                const data = await res.json();
-                this.slots = data.slots || [];
+                const data    = await res.json();
+                this.slots    = data.slots || [];
                 this.lastUpdated = new Date().toLocaleTimeString();
             } catch (e) {
                 console.error('Failed to fetch slots:', e);
@@ -722,14 +708,12 @@ function appointmentModal() {
         },
 
         selectSlot(slot) {
-            if (!slot.is_full) {
-                this.selectedTime = slot.time_value;
-            }
+            if (!slot.is_full) this.selectedTime = slot.time_value;
         },
 
         async submitAppointment() {
-            if (!this.selectedService || !this.selectedDate || !this.selectedTime) {
-                alert('Please complete all appointment details.');
+            if (!this.selectedService || !this.specificService || !this.selectedDate || !this.selectedTime) {
+                alert('Please complete all appointment details including the specific service.');
                 return;
             }
             if (!this.formData.firstName || !this.formData.lastName || !this.formData.birthdate ||
@@ -738,42 +722,38 @@ function appointmentModal() {
                 alert('Please complete all required patient information.');
                 return;
             }
-            if (!this.agreedToTerms) {
-                alert('Please agree to the terms and conditions.');
-                return;
-            }
-
-            // Minor-specific validation
+            if (!this.agreedToTerms) { alert('Please agree to the terms and conditions.'); return; }
             if (this.isMinor()) {
                 if (!this.formData.guardianName || !this.formData.guardianRelationship || !this.formData.guardianContact) {
-                    alert('Patient is a minor. Please complete all guardian/parent information.');
+                    alert('Patient is a minor. Please complete all guardian information.');
                     return;
                 }
                 if (!this.formData.guardianConsent) {
-                    alert('Patient is a minor. The parent or guardian must tick the consent checkbox before continuing.');
+                    alert('Patient is a minor. The parent or guardian must tick the consent checkbox.');
                     return;
                 }
             }
 
             const payload = {
-                service_type:           this.selectedService,
-                appointment_date:       this.selectedDate,
-                appointment_time:       this.selectedTime,
-                first_name:             this.formData.firstName,
-                middle_initial:         this.formData.middleInitial,
-                last_name:              this.formData.lastName,
-                birthdate:              this.formData.birthdate,
-                age:                    this.formData.age,
-                gender:                 this.formData.gender,
-                email:                  this.formData.email,
-                phone_number:           this.formData.phoneNumber,
-                purok_no:               this.formData.purokNo,
-                notes:                  this.formData.notes,
-                guardian_name:          this.formData.guardianName         || null,
-                guardian_relationship:  this.formData.guardianRelationship || null,
-                guardian_contact:       this.formData.guardianContact       || null,
-                guardian_consent:       this.formData.guardianConsent       || false,
-                _token:                 '{{ csrf_token() }}'
+                service_type:          this.selectedService,
+                specific_service:      this.specificService,   // ← NEW
+                appointment_date:      this.selectedDate,
+                appointment_time:      this.selectedTime,
+                first_name:            this.formData.firstName,
+                middle_initial:        this.formData.middleInitial,
+                last_name:             this.formData.lastName,
+                birthdate:             this.formData.birthdate,
+                age:                   this.formData.age,
+                gender:                this.formData.gender,
+                email:                 this.formData.email,
+                phone_number:          this.formData.phoneNumber,
+                purok_no:              this.formData.purokNo,
+                notes:                 this.formData.notes,
+                guardian_name:         this.formData.guardianName         || null,
+                guardian_relationship: this.formData.guardianRelationship || null,
+                guardian_contact:      this.formData.guardianContact       || null,
+                guardian_consent:      this.formData.guardianConsent       || false,
+                _token:                '{{ csrf_token() }}'
             };
 
             try {
@@ -786,9 +766,7 @@ function appointmentModal() {
                     },
                     body: JSON.stringify(payload)
                 });
-
                 const data = await response.json();
-
                 if (response.ok && data.success) {
                     window.location.href = '{{ route("appointments.index") }}';
                 } else {

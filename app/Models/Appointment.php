@@ -11,14 +11,10 @@ class Appointment extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
         'service_type',
+        'specific_service',      // ← NEW: the sub-option within each service type
         'appointment_date',
         'appointment_time',
         'first_name',
@@ -40,99 +36,127 @@ class Appointment extends Model
         'guardian_consent',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'appointment_date' => 'date',
         'appointment_time' => 'datetime:H:i',
-        'birthdate' => 'date',
-        'is_minor' => 'boolean',
+        'birthdate'        => 'date',
+        'is_minor'         => 'boolean',
         'guardian_consent' => 'boolean',
-        'appointment_date' => 'date',
     ];
 
-    /**
-     * Get the user that owns the appointment.
-     */
+    // ─────────────────────────────────────────────────────────────────────
+    //  SERVICE OPTIONS — used by both the booking modal and admin views
+    // ─────────────────────────────────────────────────────────────────────
+
+    public static function serviceOptions(): array
+    {
+        return [
+            'checkup' => [
+                'General Check-up',
+                'Prenatal Check-up',
+                'Child Health / IMCI',
+                'Family Planning Consultation',
+                'Senior Citizen Check-up',
+                'Blood Pressure Monitoring',
+                'Blood Sugar Monitoring',
+                'Postpartum Check-up',
+                'TB DOTS Consultation',
+            ],
+            'vaccine' => [
+                'BCG Vaccine',
+                'Hepatitis B Vaccine',
+                'OPV / IPV (Polio)',
+                'Pentavalent Vaccine (DPT-HepB-Hib)',
+                'Measles-Rubella (MR) Vaccine',
+                'HPV Vaccine',
+                'Influenza Vaccine',
+                'Tetanus Toxoid (TT)',
+                'COVID-19 Vaccine',
+                'PCV (Pneumococcal) Vaccine',
+            ],
+            'medicine' => [
+                'Paracetamol',
+                'Amoxicillin',
+                'Mefenamic Acid',
+                'Cetirizine (Antihistamine)',
+                'Amlodipine (Hypertension)',
+                'Metformin (Diabetes)',
+                'Ferrous Sulfate (Iron Supplement)',
+                'Vitamin A',
+                'Vitamin B Complex',
+                'Multivitamins',
+                'ORS (Oral Rehydration Salts)',
+            ],
+        ];
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    //  RELATIONSHIPS
+    // ─────────────────────────────────────────────────────────────────────
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the health records for the appointment.
-     */
     public function healthRecords(): HasMany
     {
         return $this->hasMany(HealthRecord::class);
     }
 
-    /**
-     * Get the full name of the patient.
-     */
+    // ─────────────────────────────────────────────────────────────────────
+    //  ACCESSORS
+    // ─────────────────────────────────────────────────────────────────────
+
     public function getFullNameAttribute(): string
     {
         $middle = $this->middle_initial ? $this->middle_initial . '. ' : '';
         return "{$this->first_name} {$middle}{$this->last_name}";
     }
 
-    /**
-     * Get the service type label.
-     */
     public function getServiceTypeLabelAttribute(): string
     {
-        return match($this->service_type) {
-            'checkup' => 'Check Up',
-            'vaccine' => 'Vaccination',
+        return match ($this->service_type) {
+            'checkup'  => 'Check Up',
+            'vaccine'  => 'Vaccination',
             'medicine' => 'Medicine Request',
-            default => 'Unknown',
+            default    => 'Unknown',
         };
     }
 
-    /**
-     * Get the status label.
-     */
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
-            'pending' => 'Pending',
+        return match ($this->status) {
+            'pending'   => 'Pending',
             'confirmed' => 'Confirmed',
             'completed' => 'Completed',
             'cancelled' => 'Cancelled',
-            default => 'Unknown',
+            default     => 'Unknown',
         };
     }
 
-    /**
-     * Scope a query to only include appointments for a specific user.
-     */
+    // ─────────────────────────────────────────────────────────────────────
+    //  SCOPES
+    // ─────────────────────────────────────────────────────────────────────
+
     public function scopeForUser($query, $userId)
     {
         return $query->where('user_id', $userId);
     }
 
-    /**
-     * Scope a query to only include upcoming appointments.
-     */
     public function scopeUpcoming($query)
     {
         return $query->where('appointment_date', '>=', now()->toDateString())
-                     ->whereIn('status', ['pending', 'confirmed'])
-                     ->orderBy('appointment_date')
-                     ->orderBy('appointment_time');
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->orderBy('appointment_date')
+            ->orderBy('appointment_time');
     }
 
-    /**
-     * Scope a query to only include past appointments.
-     */
     public function scopePast($query)
     {
-        return $query->where(function($q) {
+        return $query->where(function ($q) {
             $q->where('appointment_date', '<', now()->toDateString())
-              ->orWhere('status', 'completed');
+                ->orWhere('status', 'completed');
         })->orderBy('appointment_date', 'desc');
     }
 }

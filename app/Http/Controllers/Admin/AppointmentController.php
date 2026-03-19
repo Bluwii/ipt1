@@ -1,4 +1,10 @@
 <?php
+// ─────────────────────────────────────────────────────────────────────────────
+// Replace your app/Http/Controllers/Admin/AppointmentController.php
+// with this file. Key changes:
+//   - index() map now includes 'specific_service'
+//   - update() validation now includes 'specific_service'
+// ─────────────────────────────────────────────────────────────────────────────
 
 namespace App\Http\Controllers\Admin;
 
@@ -24,29 +30,16 @@ class AppointmentController extends Controller
             ->orderBy('appointment_date', 'desc')
             ->orderBy('appointment_time', 'desc');
 
-        // ── Filters ──────────────────────────────────────────────
-        if ($request->filled('service')) {
-            $query->where('service_type', $request->service);
-        }
-
-        if ($request->filled('status') && $request->status !== 'all') {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('date_from')) {
-            $query->whereDate('appointment_date', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('appointment_date', '<=', $request->date_to);
-        }
-
+        if ($request->filled('service'))   $query->where('service_type', $request->service);
+        if ($request->filled('status') && $request->status !== 'all') $query->where('status', $request->status);
+        if ($request->filled('date_from')) $query->whereDate('appointment_date', '>=', $request->date_from);
+        if ($request->filled('date_to'))   $query->whereDate('appointment_date', '<=', $request->date_to);
         if ($request->filled('search')) {
             $s = $request->search;
             $query->where(function ($q) use ($s) {
                 $q->where('first_name', 'like', "%{$s}%")
                   ->orWhere('last_name',  'like', "%{$s}%")
-                  ->orWhereHas('user', fn($u) => $u->where('name', 'like', "%{$s}%"));
+                  ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$s}%"));
             });
         }
 
@@ -59,6 +52,7 @@ class AppointmentController extends Controller
                 'appointment_time' => \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A'),
                 'service_type'     => $appointment->service_type_label,
                 'service_raw'      => $appointment->service_type,
+                'specific_service' => $appointment->specific_service ?? '—',   // ← NEW
                 'status'           => $appointment->status,
                 'status_label'     => $appointment->status_label,
                 'is_minor'         => $appointment->is_minor ?? false,
@@ -71,56 +65,44 @@ class AppointmentController extends Controller
     public function show(Appointment $appointment): View
     {
         $appointment->load('user');
-
-        // Prescription requests are stored in health_records with record_type='prescription'
-        // Try to match by source_appointment_id first, then fall back to most recent for this user
         $prescriptionRequest = null;
         if ($appointment->service_type === 'medicine' && $appointment->user_id) {
             $prescriptionRequest = HealthRecord::where('user_id', $appointment->user_id)
                 ->where('record_type', 'prescription')
                 ->where('source_appointment_id', $appointment->id)
                 ->first();
-
             if (!$prescriptionRequest) {
-                // Fall back: most recent prescription record for this user
                 $prescriptionRequest = HealthRecord::where('user_id', $appointment->user_id)
-                    ->where('record_type', 'prescription')
-                    ->latest()
-                    ->first();
+                    ->where('record_type', 'prescription')->latest()->first();
             }
         }
-
         return view('admin.appointments.show', compact('appointment', 'prescriptionRequest'));
     }
 
     public function updateStatus(Request $request, Appointment $appointment): RedirectResponse
     {
-        $request->validate([
-            'status' => 'required|in:pending,confirmed,completed,cancelled',
-        ]);
-
+        $request->validate(['status' => 'required|in:pending,confirmed,completed,cancelled']);
         $oldStatus = $appointment->status;
-        $newStatus = $request->status;
-
-        $appointment->update(['status' => $newStatus]);
-
-        if ($newStatus === 'completed' && $oldStatus !== 'completed') {
+        $appointment->update(['status' => $request->status]);
+        if ($request->status === 'completed' && $oldStatus !== 'completed') {
             $this->createHealthRecordFromAppointment($appointment);
         }
-
         return redirect()->back()->with('success', 'Appointment status updated successfully!');
     }
 
     public function edit(Appointment $appointment): View
     {
-        return view('admin.appointments.edit', compact('appointment'));
+        // Pass service options so the edit view can show the specific_service dropdown
+        $serviceOptions = Appointment::serviceOptions();
+        return view('admin.appointments.edit', compact('appointment', 'serviceOptions'));
     }
 
     public function update(Request $request, Appointment $appointment): RedirectResponse
     {
         $validated = $request->validate([
-            'status'      => 'required|in:pending,confirmed,completed,cancelled',
-            'admin_notes' => 'nullable|string|max:500',
+            'status'           => 'required|in:pending,confirmed,completed,cancelled',
+            'specific_service' => 'nullable|string|max:100',   // ← NEW
+            'admin_notes'      => 'nullable|string|max:500',
         ]);
 
         $oldStatus = $appointment->status;
@@ -130,8 +112,7 @@ class AppointmentController extends Controller
             $this->createHealthRecordFromAppointment($appointment);
         }
 
-        return redirect()->route('admin.appointments.index')
-            ->with('success', 'Appointment updated successfully!');
+        return redirect()->route('admin.appointments.index')->with('success', 'Appointment updated successfully!');
     }
 
     public function destroy(Appointment $appointment): RedirectResponse
@@ -143,25 +124,22 @@ class AppointmentController extends Controller
     private function createHealthRecordFromAppointment(Appointment $appointment): void
     {
         $exists = HealthRecord::where('user_id', $appointment->user_id)
-            ->where('source_appointment_id', $appointment->id)
-            ->exists();
-
+            ->where('source_appointment_id', $appointment->id)->exists();
         if ($exists) return;
 
-        $map = [
-            'checkup'  => 'consultation',
-            'vaccine'  => 'vaccination',
-            'medicine' => 'prescription',
-        ];
-
+        $map        = ['checkup' => 'consultation', 'vaccine' => 'vaccination', 'medicine' => 'prescription'];
         $recordType = $map[$appointment->service_type] ?? 'consultation';
+
+        // Use specific_service as the title if available
+        $title = $appointment->specific_service
+            ? $appointment->specific_service . ' — ' . $appointment->appointment_date->format('M d, Y')
+            : $appointment->service_type_label . ' — ' . $appointment->appointment_date->format('M d, Y');
 
         $data = [
             'user_id'               => $appointment->user_id,
             'record_type'           => $recordType,
-            'title'                 => $appointment->service_type_label . ' — ' .
-                                       $appointment->appointment_date->format('M d, Y'),
-            'provider_name'        => 'Tambubong Health Center',
+            'title'                 => $title,
+            'provider_name'         => 'Tambubong Health Center',
             'record_date'           => $appointment->appointment_date,
             'notes'                 => $appointment->notes ?? null,
             'source_appointment_id' => $appointment->id,
