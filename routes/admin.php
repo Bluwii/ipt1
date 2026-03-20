@@ -42,8 +42,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Prescription Requests
     Route::get('/prescriptions',               [PrescriptionController::class, 'index'])->name('prescriptions.index');
     Route::get('/prescriptions/{id}',          [PrescriptionController::class, 'show'])->name('prescriptions.show');
+    Route::patch('/prescriptions/{id}',        [PrescriptionController::class, 'update'])->name('prescriptions.update');
     Route::post('/prescriptions/{id}/approve', [PrescriptionController::class, 'approve'])->name('prescriptions.approve');
     Route::post('/prescriptions/{id}/reject',  [PrescriptionController::class, 'reject'])->name('prescriptions.reject');
+    Route::post('/prescriptions/{id}/deduct-inventory', [PrescriptionController::class, 'deductInventory'])
+         ->name('prescriptions.deductInventory');
 
     // Users Management
     Route::get('/users',                          [UserController::class, 'index'])->name('users.index');

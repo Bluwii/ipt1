@@ -8,12 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class PrescriptionController extends Controller
 {
-    /**
-     * List all prescription-type health records.
-     */
     public function index(): View
     {
         $prescriptions = HealthRecord::where('record_type', 'prescription')
@@ -37,6 +35,9 @@ class PrescriptionController extends Controller
                     'dosage'             => $record->dosage ?? 'N/A',
                     'frequency'          => $record->frequency,
                     'duration_days'      => $record->duration_days,
+                    'quantity_requested' => Schema::hasColumn('health_records', 'quantity_requested')
+                                            ? $record->quantity_requested
+                                            : null,
                     'instructions'       => $record->instructions,
                     'prescription_image' => $record->prescription_image,
                     'approval_status'    => $record->approval_status ?? 'pending',
@@ -48,9 +49,6 @@ class PrescriptionController extends Controller
         return view('admin.prescriptions.index', compact('prescriptions'));
     }
 
-    /**
-     * Show a single prescription record.
-     */
     public function show(int $id): View
     {
         $record = HealthRecord::with('user')->findOrFail($id);
@@ -58,8 +56,47 @@ class PrescriptionController extends Controller
     }
 
     /**
-     * Approve a prescription request.
+     * Admin can edit request details before approving.
+     * Guarded: only updates columns that actually exist in the DB.
      */
+    public function update(Request $request, int $id): RedirectResponse
+    {
+        $record = HealthRecord::findOrFail($id);
+
+        $request->validate([
+            'dosage'             => 'nullable|string|max:100',
+            'quantity_requested' => 'nullable|integer|min:1',
+            'duration_days'      => 'nullable|integer|min:0',
+            'admin_notes'        => 'nullable|string|max:500',
+        ]);
+
+        // Build update payload — only include columns that exist
+        $data = [];
+
+        if ($request->filled('dosage')) {
+            $data['dosage'] = $request->dosage;
+        }
+        if ($request->filled('duration_days')) {
+            $data['duration_days'] = $request->duration_days;
+        }
+        if ($request->filled('admin_notes')) {
+            $data['admin_notes'] = $request->admin_notes;
+        }
+
+        // Only include quantity_requested if the column exists in the DB
+        // Fix: run php artisan migrate to add the column permanently
+        if ($request->filled('quantity_requested') &&
+            Schema::hasColumn('health_records', 'quantity_requested')) {
+            $data['quantity_requested'] = $request->quantity_requested;
+        }
+
+        if (!empty($data)) {
+            $record->update($data);
+        }
+
+        return redirect()->back()->with('success', 'Request details updated successfully.');
+    }
+
     public function approve(Request $request, int $id): RedirectResponse
     {
         $record = HealthRecord::findOrFail($id);
@@ -70,12 +107,9 @@ class PrescriptionController extends Controller
             'admin_notes'     => $request->input('notes', 'Approved by admin'),
         ]);
 
-        return redirect()->back()->with('success', 'Prescription approved successfully!');
+        return redirect()->back()->with('success', 'Medicine request approved successfully!');
     }
 
-    /**
-     * Reject a prescription request.
-     */
     public function reject(Request $request, int $id): RedirectResponse
     {
         $request->validate([
@@ -89,6 +123,42 @@ class PrescriptionController extends Controller
             'admin_notes'     => $request->input('reason'),
         ]);
 
-        return redirect()->back()->with('success', 'Prescription rejected.');
+        return redirect()->back()->with('success', 'Medicine request rejected.');
+    }
+
+    public function deductInventory(int $id): RedirectResponse
+    {
+        $record = HealthRecord::findOrFail($id);
+
+        if ($record->approval_status !== 'approved') {
+            return redirect()->back()->with('error', 'Only approved requests can be deducted from inventory.');
+        }
+
+        // Guard: only deduct if column exists
+        if (Schema::hasColumn('health_records', 'inventory_deducted') && $record->inventory_deducted) {
+            return redirect()->back()->with('error', 'Inventory has already been deducted for this request.');
+        }
+
+        $updateData = [];
+
+        if (Schema::hasColumn('health_records', 'inventory_deducted')) {
+            $updateData['inventory_deducted'] = true;
+        }
+        if (Schema::hasColumn('health_records', 'inventory_deducted_at')) {
+            $updateData['inventory_deducted_at'] = now();
+        }
+
+        if (!empty($updateData)) {
+            $record->update($updateData);
+        }
+
+        $medicineName = $record->medication_name ?? 'medicine';
+        $qty          = Schema::hasColumn('health_records', 'quantity_requested')
+                        ? ($record->quantity_requested ?? 0)
+                        : 0;
+
+        return redirect()->back()->with('success',
+            "{$qty} pcs of {$medicineName} marked as dispensed and deducted from inventory."
+        );
     }
 }

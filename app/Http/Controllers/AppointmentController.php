@@ -97,7 +97,7 @@ class AppointmentController extends Controller
 
         $validated = $request->validate([
             'service_type'     => 'required|in:checkup,vaccine,medicine',
-            'appointment_date' => 'required|date|after:today',
+            'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required|in:08:00,09:00,10:00,11:00,12:00',
             'first_name'       => 'required|string|max:255',
             'middle_initial'   => 'nullable|string|max:1',

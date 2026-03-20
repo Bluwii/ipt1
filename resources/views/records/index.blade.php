@@ -11,7 +11,6 @@
                 <img src="{{ asset('image/logo.png') }}" alt="Logo" class="object-contain w-8 h-8 sm:w-10 sm:h-10">
                 <span class="text-base font-bold text-gray-800 sm:text-xl lg:text-2xl">Tambubong Health Center</span>
             </div>
-
             <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                 <button @click="open = !open" class="flex items-center gap-3 px-4 py-2 transition-colors rounded-lg hover:bg-gray-100">
                     <div class="flex items-center justify-center w-10 h-10 text-white bg-blue-600 rounded-full">
@@ -49,13 +48,12 @@
                 <h1 class="text-3xl font-bold text-gray-900">My Health Records</h1>
                 <p class="mt-2 text-gray-600">View your medical history and health information</p>
             </div>
-            <!-- Request Prescription Button -->
             <button @click="prescriptionModal = true"
-                    class="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700">
+                    class="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 shadow-sm transition-all hover:shadow-md">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
-                Request Prescription
+                Request Medicine
             </button>
         </div>
 
@@ -83,7 +81,7 @@
                         id="prescriptions"
                         :class="activeTab === 'prescriptions' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
                         class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap">
-                    Prescriptions ({{ $prescriptions->count() }})
+                    Medicine Requests ({{ $prescriptions->count() }})
                 </button>
             </div>
 
@@ -167,10 +165,10 @@
                 @endif
             </div>
 
-            <!-- Prescriptions Tab -->
+            <!-- Medicine Requests Tab -->
             <div x-show="activeTab === 'prescriptions'" class="py-6">
                 <div class="flex items-center justify-between mb-4">
-                    <p class="text-sm text-gray-500">Prescription requests submitted for admin approval.</p>
+                    <p class="text-sm text-gray-500">Your medicine requests submitted to the health center.</p>
                     <button @click="prescriptionModal = true"
                             class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700">
                         + New Request
@@ -182,52 +180,85 @@
                         @foreach($prescriptions as $record)
                             <div class="p-6 bg-white shadow-md rounded-xl">
                                 <div class="flex items-start justify-between mb-4">
-                                    <div>
-                                        <h3 class="text-lg font-semibold text-gray-900">{{ $record->medication_name ?? $record->title }}</h3>
-                                        <p class="text-sm text-gray-500">Submitted {{ $record->created_at->diffForHumans() }}</p>
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg">
+                                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-gray-900">{{ $record->medication_name ?? $record->title }}</h3>
+                                            <p class="text-sm text-gray-500">Submitted {{ $record->created_at->diffForHumans() }}</p>
+                                        </div>
                                     </div>
-                                    @if($record->approval_status === 'approved')
-                                        <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Approved</span>
-                                    @elseif($record->approval_status === 'rejected')
-                                        <span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Rejected</span>
-                                    @else
-                                        <span class="px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">Pending Review</span>
-                                    @endif
+                                    <div class="flex items-center gap-2">
+                                        @if($record->prescription_image)
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                </svg>
+                                                With Rx
+                                            </span>
+                                        @endif
+                                        @if($record->approval_status === 'approved')
+                                            <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">✓ Approved</span>
+                                        @elseif($record->approval_status === 'rejected')
+                                            <span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">✗ Rejected</span>
+                                        @else
+                                            <span class="px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">⏳ Pending</span>
+                                        @endif
+                                    </div>
                                 </div>
-                                <div class="space-y-2 text-sm text-gray-700">
+                                <div class="grid grid-cols-2 gap-3 text-sm text-gray-700 sm:grid-cols-4">
                                     @if($record->dosage)
-                                        <p><span class="font-medium">Dosage:</span> {{ $record->dosage }}</p>
+                                        <div class="p-2 rounded-lg bg-gray-50">
+                                            <p class="text-xs font-medium text-gray-500">Dosage</p>
+                                            <p class="font-semibold">{{ $record->dosage }}</p>
+                                        </div>
                                     @endif
                                     @if($record->frequency)
-                                        <p><span class="font-medium">Frequency:</span> {{ $record->frequency }}</p>
+                                        <div class="p-2 rounded-lg bg-gray-50">
+                                            <p class="text-xs font-medium text-gray-500">Frequency</p>
+                                            <p class="font-semibold">{{ $record->frequency }}</p>
+                                        </div>
                                     @endif
                                     @if($record->duration_days)
-                                        <p><span class="font-medium">Duration:</span> {{ $record->duration_days }} days</p>
+                                        <div class="p-2 rounded-lg bg-gray-50">
+                                            <p class="text-xs font-medium text-gray-500">Duration</p>
+                                            <p class="font-semibold">{{ $record->duration_days }} days</p>
+                                        </div>
                                     @endif
-                                    @if($record->instructions)
-                                        <p><span class="font-medium">Instructions:</span> {{ $record->instructions }}</p>
-                                    @endif
-                                    @if($record->admin_notes && $record->approval_status !== 'pending')
-                                        <div class="p-3 mt-3 rounded-lg {{ $record->approval_status === 'approved' ? 'bg-green-50' : 'bg-red-50' }}">
-                                            <p class="text-xs font-medium {{ $record->approval_status === 'approved' ? 'text-green-800' : 'text-red-800' }}">
-                                                Admin Note: {{ $record->admin_notes }}
-                                            </p>
+                                    @if($record->quantity_requested)
+                                        <div class="p-2 rounded-lg bg-gray-50">
+                                            <p class="text-xs font-medium text-gray-500">Quantity</p>
+                                            <p class="font-semibold">{{ $record->quantity_requested }} pcs</p>
                                         </div>
                                     @endif
                                 </div>
+                                @if($record->instructions)
+                                    <p class="mt-3 text-sm text-gray-600"><span class="font-medium">Instructions:</span> {{ $record->instructions }}</p>
+                                @endif
+                                @if($record->admin_notes && $record->approval_status !== 'pending')
+                                    <div class="p-3 mt-3 rounded-lg {{ $record->approval_status === 'approved' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200' }}">
+                                        <p class="text-xs font-semibold mb-0.5 {{ $record->approval_status === 'approved' ? 'text-green-700' : 'text-red-700' }}">Admin Note:</p>
+                                        <p class="text-sm {{ $record->approval_status === 'approved' ? 'text-green-800' : 'text-red-800' }}">{{ $record->admin_notes }}</p>
+                                    </div>
+                                @endif
                             </div>
                         @endforeach
                     </div>
                 @else
                     <div class="p-12 text-center bg-white shadow-md rounded-xl">
-                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                        <h3 class="mb-2 text-lg font-semibold text-gray-900">No Prescription Requests</h3>
-                        <p class="mb-4 text-gray-600">Submit a prescription image for admin approval.</p>
+                        <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full">
+                            <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                        <h3 class="mb-2 text-lg font-semibold text-gray-900">No Medicine Requests</h3>
+                        <p class="mb-4 text-gray-600">Request medicine from the health center's available stock.</p>
                         <button @click="prescriptionModal = true"
                                 class="px-6 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700">
-                            Request Prescription
+                            Request Medicine
                         </button>
                     </div>
                 @endif
@@ -235,127 +266,311 @@
         </div>
     </div>
 
-    <!-- ===================== Prescription Request Modal ===================== -->
+    <!-- ===================== MEDICINE REQUEST MODAL ===================== -->
     <div x-show="prescriptionModal"
          x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+         class="fixed inset-0 z-50 overflow-y-auto"
          @keydown.escape.window="prescriptionModal = false">
-        <div class="relative w-full max-w-lg mx-4 bg-white shadow-2xl rounded-2xl"
-             @click.outside="prescriptionModal = false">
 
-            <!-- Header -->
-            <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                <h3 class="text-xl font-bold text-gray-900">Request Prescription</h3>
-                <button @click="prescriptionModal = false" class="p-2 text-gray-400 rounded-lg hover:text-gray-600 hover:bg-gray-100">✕</button>
+        <!-- Backdrop -->
+        <div class="fixed inset-0 transition-opacity bg-black bg-opacity-50"
+             @click="prescriptionModal = false"></div>
+
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="relative w-full max-w-xl overflow-hidden bg-white shadow-2xl rounded-2xl"
+                 @click.outside="prescriptionModal = false"
+                 x-data="medicineRequestForm()">
+
+                <!-- Modal Header -->
+                <div class="px-6 py-5 bg-gradient-to-r from-blue-600 to-blue-700">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center justify-center w-10 h-10 bg-white/20 rounded-xl">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white">Request Medicine</h3>
+                                <p class="text-xs text-blue-200">Select from available health center stock</p>
+                            </div>
+                        </div>
+                        <button @click="prescriptionModal = false"
+                                class="p-2 transition-colors rounded-lg text-white/70 hover:text-white hover:bg-white/10">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Patient Info Banner (auto-filled) -->
+                <div class="px-6 py-3 border-b border-blue-100 bg-blue-50">
+                    <div class="flex items-center gap-2 text-sm text-blue-800">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        <span>Requesting as: <strong>{{ Auth::user()->name }}</strong></span>
+                        <span class="text-blue-400">•</span>
+                        <span class="text-blue-600">{{ Auth::user()->email }}</span>
+                    </div>
+                </div>
+
+                <!-- Form Body -->
+                <form id="medicineRequestForm" class="p-6 space-y-5" @submit.prevent="submitRequest()">
+                    @csrf
+
+                    <!-- Medicine Selection -->
+                    <div>
+                        <label class="block mb-2 text-sm font-semibold text-gray-700">
+                            Select Medicine <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <select name="medication_name" x-model="selectedMedicine" required
+                                    class="w-full py-3 pl-4 pr-10 text-sm bg-white border border-gray-300 appearance-none rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">-- Select medicine --</option>
+                                @php
+                                    // Medicine inventory — admin can manage these
+                                    $medicines = [
+                                        ['name' => 'Paracetamol 500mg', 'category' => 'Pain Relief / Fever'],
+                                        ['name' => 'Mefenamic Acid 500mg', 'category' => 'Pain Relief'],
+                                        ['name' => 'Amoxicillin 500mg', 'category' => 'Antibiotic'],
+                                        ['name' => 'Amoxicillin 250mg (Syrup)', 'category' => 'Antibiotic'],
+                                        ['name' => 'Cetirizine 10mg', 'category' => 'Antihistamine'],
+                                        ['name' => 'Loratadine 10mg', 'category' => 'Antihistamine'],
+                                        ['name' => 'Amlodipine 5mg', 'category' => 'Hypertension'],
+                                        ['name' => 'Amlodipine 10mg', 'category' => 'Hypertension'],
+                                        ['name' => 'Losartan 50mg', 'category' => 'Hypertension'],
+                                        ['name' => 'Metformin 500mg', 'category' => 'Diabetes'],
+                                        ['name' => 'Glibenclamide 5mg', 'category' => 'Diabetes'],
+                                        ['name' => 'Ferrous Sulfate 325mg', 'category' => 'Supplement'],
+                                        ['name' => 'Vitamin A 10,000 IU', 'category' => 'Vitamin / Supplement'],
+                                        ['name' => 'Vitamin B Complex', 'category' => 'Vitamin / Supplement'],
+                                        ['name' => 'Multivitamins', 'category' => 'Vitamin / Supplement'],
+                                        ['name' => 'Ascorbic Acid 500mg', 'category' => 'Vitamin / Supplement'],
+                                        ['name' => 'ORS (Oral Rehydration Salts)', 'category' => 'Rehydration'],
+                                        ['name' => 'Salbutamol 2mg', 'category' => 'Respiratory'],
+                                        ['name' => 'Cotrimoxazole 400/80mg', 'category' => 'Antibiotic'],
+                                        ['name' => 'Omeprazole 20mg', 'category' => 'Gastrointestinal'],
+                                        ['name' => 'Antacid (Aluminum Hydroxide)', 'category' => 'Gastrointestinal'],
+                                        ['name' => 'Ibuprofen 200mg', 'category' => 'Pain Relief / Anti-inflammatory'],
+                                    ];
+                                    $categories = collect($medicines)->groupBy('category');
+                                @endphp
+                                @foreach($categories as $category => $items)
+                                    <optgroup label="{{ $category }}">
+                                        @foreach($items as $med)
+                                            <option value="{{ $med['name'] }}">{{ $med['name'] }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dosage & Quantity Row -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block mb-2 text-sm font-semibold text-gray-700">
+                                Dosage <span class="text-red-500">*</span>
+                            </label>
+                            <select name="dosage" x-model="dosage" required
+                                    class="w-full px-4 py-3 text-sm bg-white border border-gray-300 appearance-none rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select dosage</option>
+                                <option>1 tablet daily</option>
+                                <option>1 tablet twice daily</option>
+                                <option>1 tablet 3x daily</option>
+                                <option>½ tablet daily</option>
+                                <option>As needed (PRN)</option>
+                                <option>As directed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-semibold text-gray-700">
+                                Quantity <span class="text-red-500">*</span>
+                            </label>
+                            <select name="quantity_requested" required
+                                    class="w-full px-4 py-3 text-sm bg-white border border-gray-300 appearance-none rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select qty</option>
+                                <option value="10">10 pcs</option>
+                                <option value="20">20 pcs</option>
+                                <option value="30">30 pcs</option>
+                                <option value="60">60 pcs</option>
+                                <option value="90">90 pcs (3-month supply)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Frequency & Duration Row -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block mb-2 text-sm font-semibold text-gray-700">Frequency</label>
+                            <select name="frequency"
+                                    class="w-full px-4 py-3 text-sm bg-white border border-gray-300 appearance-none rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select frequency</option>
+                                <option>Once daily</option>
+                                <option>Twice daily</option>
+                                <option>Three times daily</option>
+                                <option>Four times daily</option>
+                                <option>Every 6 hours</option>
+                                <option>Every 8 hours</option>
+                                <option>As needed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-semibold text-gray-700">Duration (days)</label>
+                            <select name="duration_days"
+                                    class="w-full px-4 py-3 text-sm bg-white border border-gray-300 appearance-none rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select duration</option>
+                                <option value="3">3 days</option>
+                                <option value="5">5 days</option>
+                                <option value="7">7 days</option>
+                                <option value="14">14 days</option>
+                                <option value="30">30 days (1 month)</option>
+                                <option value="90">90 days (3 months)</option>
+                                <option value="0">Ongoing / Maintenance</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Purpose / Notes -->
+                    <div>
+                        <label class="block mb-2 text-sm font-semibold text-gray-700">
+                            Purpose / Condition <span class="font-normal text-gray-400">(optional)</span>
+                        </label>
+                        <textarea name="instructions" rows="2" maxlength="300"
+                                  class="block w-full px-4 py-3 text-sm border border-gray-300 resize-none rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="e.g. For hypertension maintenance, diabetes management..."></textarea>
+                    </div>
+
+                    <!-- Prescription Image (OPTIONAL) -->
+                    <div class="p-4 border-2 border-gray-200 border-dashed rounded-xl bg-gray-50">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 mt-0.5">
+                                <div class="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <label class="text-sm font-semibold text-gray-700">Doctor's Prescription</label>
+                                    <span class="px-2 py-0.5 text-xs font-semibold text-emerald-700 bg-emerald-100 rounded-full">Recommended</span>
+                                    <span class="text-xs font-normal text-gray-400">Optional</span>
+                                </div>
+                                <p class="mb-3 text-xs text-gray-500">Uploading a valid prescription from your doctor helps us serve you faster and with the correct dosage. Requests with a prescription are processed with priority.</p>
+                                <input type="file" name="prescription_image" id="prescriptionImageInput"
+                                       accept="image/jpeg,image/png,image/jpg"
+                                       @change="handleFileChange($event)"
+                                       class="block w-full text-sm text-gray-500 cursor-pointer file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                                <p class="mt-1 text-xs text-gray-400">JPG or PNG, max 5MB</p>
+
+                                <!-- Preview -->
+                                <div x-show="previewUrl" class="relative inline-block mt-3">
+                                    <img :src="previewUrl" class="object-cover h-20 border border-gray-200 rounded-lg">
+                                    <button type="button" @click="clearFile()"
+                                            class="absolute flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -top-2 -right-2 hover:bg-red-600">✕</button>
+                                    <p class="mt-1 text-xs font-medium text-green-600">✓ Prescription attached</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error area -->
+                    <div id="medicineRequestError" class="hidden p-3 text-sm text-red-800 bg-red-100 border border-red-200 rounded-xl"></div>
+
+                    <!-- Submit Buttons -->
+                    <div class="flex justify-end gap-3 pt-2 border-t border-gray-100">
+                        <button type="button" @click="prescriptionModal = false"
+                                class="px-5 py-2.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" id="medicineSubmitBtn"
+                                class="px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm">
+                            Submit Request
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <!-- Form -->
-            <form id="prescriptionForm" class="p-6 space-y-4">
-                @csrf
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block mb-1 text-sm font-semibold text-gray-700">Medicine Name <span class="text-red-500">*</span></label>
-                        <input type="text" name="medication_name" required
-                               class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                    </div>
-                    <div>
-                        <label class="block mb-1 text-sm font-semibold text-gray-700">Dosage <span class="text-red-500">*</span></label>
-                        <input type="text" name="dosage" required placeholder="e.g. 500mg"
-                               class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block mb-1 text-sm font-semibold text-gray-700">Frequency <span class="text-red-500">*</span></label>
-                        <input type="text" name="frequency" required placeholder="e.g. 3 times daily"
-                               class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                    </div>
-                    <div>
-                        <label class="block mb-1 text-sm font-semibold text-gray-700">Duration (days)</label>
-                        <input type="number" name="duration_days" min="1" max="365"
-                               class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                    </div>
-                </div>
-                <div>
-                    <label class="block mb-1 text-sm font-semibold text-gray-700">Special Instructions</label>
-                    <textarea name="instructions" rows="2" maxlength="500"
-                              class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                              placeholder="e.g. Take after meals..."></textarea>
-                </div>
-                <div>
-                    <label class="block mb-1 text-sm font-semibold text-gray-700">
-                        Prescription Image <span class="text-red-500">*</span>
-                        <span class="text-xs font-normal text-gray-400">(JPG/PNG, max 5MB)</span>
-                    </label>
-                    <input type="file" name="prescription_image" accept="image/jpeg,image/png,image/jpg" required
-                           class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-lg file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-green-600 file:text-white hover:file:bg-green-700">
-                </div>
-
-                <!-- Error message area -->
-                <div id="prescriptionError" class="hidden p-3 text-sm text-red-800 bg-red-100 rounded-lg"></div>
-
-                <div class="flex justify-end gap-3 pt-2">
-                    <button type="button" @click="prescriptionModal = false"
-                            class="px-5 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
-                    </button>
-                    <button type="submit" id="prescriptionSubmitBtn"
-                            class="px-5 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50">
-                        Submit Request
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
 
 <script>
-document.getElementById('prescriptionForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
+function medicineRequestForm() {
+    return {
+        selectedMedicine: '',
+        dosage: '',
+        previewUrl: null,
+        fileInput: null,
 
-    const btn      = document.getElementById('prescriptionSubmitBtn');
-    const errorDiv = document.getElementById('prescriptionError');
-    btn.disabled   = true;
-    btn.textContent = 'Submitting…';
-    errorDiv.classList.add('hidden');
+        handleFileChange(event) {
+            const file = event.target.files[0];
+            if (!file) { this.previewUrl = null; return; }
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be under 5MB.');
+                event.target.value = '';
+                this.previewUrl = null;
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => { this.previewUrl = e.target.result; };
+            reader.readAsDataURL(file);
+        },
 
-    const formData = new FormData(this);
+        clearFile() {
+            this.previewUrl = null;
+            const input = document.getElementById('prescriptionImageInput');
+            if (input) input.value = '';
+        },
 
-    try {
-        const response = await fetch('{{ route("prescriptions.store") }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                // FIX: Tell Laravel to return JSON errors instead of a redirect
-                // Without this, a validation failure returns HTML (302 redirect)
-                // which causes response.json() to crash silently
-                'Accept': 'application/json'
-                // NOTE: Do NOT set Content-Type here — the browser must set it
-                // automatically with the multipart/form-data boundary for file uploads
-            },
-            body: formData,
-        });
+        async submitRequest() {
+            const form    = document.getElementById('medicineRequestForm');
+            const btn     = document.getElementById('medicineSubmitBtn');
+            const errDiv  = document.getElementById('medicineRequestError');
 
-        const data = await response.json();
+            btn.disabled = true;
+            btn.textContent = 'Submitting…';
+            errDiv.classList.add('hidden');
 
-        if (response.ok && data.success) {
-            // Close modal and reload to show new prescription
-            window.location.reload();
-        } else {
-            const messages = data.errors
-                ? Object.values(data.errors).flat().join(' ')
-                : (data.message || 'Submission failed. Please try again.');
-            errorDiv.textContent = messages;
-            errorDiv.classList.remove('hidden');
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('{{ route("prescriptions.store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    window.location.reload();
+                } else {
+                    const messages = data.errors
+                        ? Object.values(data.errors).flat().join(' ')
+                        : (data.message || 'Submission failed. Please try again.');
+                    errDiv.textContent = messages;
+                    errDiv.classList.remove('hidden');
+                }
+            } catch (err) {
+                errDiv.textContent = 'An unexpected error occurred. Please try again.';
+                errDiv.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Submit Request';
+            }
         }
-    } catch (err) {
-        console.error('Prescription upload error:', err);
-        errorDiv.textContent = 'An unexpected error occurred. Please try again.';
-        errorDiv.classList.remove('hidden');
-    } finally {
-        btn.disabled    = false;
-        btn.textContent = 'Submit Request';
     }
-});
+}
 </script>
 @endsection

@@ -28,16 +28,21 @@ class HealthRecord extends Model
         'dosage',
         'frequency',
         'duration_days',
+        'quantity_requested',
         'instructions',
         'prescription_image',
         'approval_status',
         'admin_notes',
-        'source_appointment_id', // tracks which appointment auto-created this record
+        'source_appointment_id', 
+        'inventory_deducted',
+        'inventory_deducted_at',
     ];
 
     protected $casts = [
         'record_date'    => 'date',
         'next_dose_date' => 'date',
+        'inventory_deducted'    => 'boolean',
+        'inventory_deducted_at' => 'datetime',
     ];
 
     public function user()
