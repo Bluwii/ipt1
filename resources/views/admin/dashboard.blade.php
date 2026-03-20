@@ -151,7 +151,12 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-sm text-gray-600">{{ $appointment['user_id'] }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-600">{{ $appointment['service'] }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">
+                            <p class="font-medium text-gray-900">{{ $appointment['service'] }}</p>
+                            @if(!empty($appointment['specific_service']) && $appointment['specific_service'] !== '—')
+                                <p class="text-xs text-gray-500 mt-0.5">{{ $appointment['specific_service'] }}</p>
+                            @endif
+                        </td>
                         <td class="px-4 py-3 text-sm text-center">
                             <a href="{{ route('admin.appointments.show', $appointment['id']) }}"
                                class="px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">

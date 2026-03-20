@@ -37,7 +37,9 @@ class RegisteredUserController extends Controller
             'email'        => $request->email,
             'password'     => Hash::make($request->password),
             'birthdate'    => $request->birthdate,
-            'age'          => $request->age,
+            'age'          => $request->birthdate 
+                            ? \Carbon\Carbon::parse($request->birthdate)->age 
+                            : $request->age,
             'gender'       => $request->gender,
             'phone_number' => $request->phone_number,
             'purok_no'     => $request->purok_no,

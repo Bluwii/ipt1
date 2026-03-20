@@ -18,12 +18,7 @@ $serviceOptions = [
         'BCG Vaccine',
         'Hepatitis B Vaccine',
         'OPV / IPV (Polio)',
-        'Pentavalent Vaccine (DPT-HepB-Hib)',
-        'Measles-Rubella (MR) Vaccine',
         'HPV Vaccine',
-        'Influenza Vaccine',
-        'Tetanus Toxoid (TT)',
-        'COVID-19 Vaccine',
         'PCV (Pneumococcal) Vaccine',
     ],
     // Medicine has NO sub-options — goes directly to date/time
@@ -211,7 +206,7 @@ $medicineList = [
                                         'focus:ring-blue-500': selectedService === 'checkup',
                                         'focus:ring-red-500':  selectedService === 'vaccine'
                                     }">
-                                <option value="">-- Please select --</option>
+                                <option class="hidden" value="">-- Please select --</option>
 
                                 {{-- Checkup options --}}
                                 <template x-if="selectedService === 'checkup'">
@@ -759,15 +754,27 @@ function appointmentModal() {
 
         // Standard patient form
         formData: {
-            firstName:            '{{ Auth::user()->name ?? "" }}',
-            middleInitial:        '',
-            lastName:             '',
-            birthdate:            '',
-            age:                  '',
-            gender:               '',
+            firstName: (function() {
+                        const name = '{{ addslashes(Auth::user()->name ?? "") }}';
+                        if (name.includes(',')) {
+                            const parts = name.split(',');
+                            return parts.slice(1).join(',').trim();
+                        }
+                        return name.split(' ')[0] || '';})(),
+            middleInitial: '',
+            lastName: (function() {
+                            const name = '{{ addslashes(Auth::user()->name ?? "") }}';
+                            if (name.includes(',')) {
+                                return name.split(',')[0].trim();
+                            }
+                            return name.split(' ').slice(1).join(' ') || '';
+                        })(),
+            birthdate:            '{{ Auth::user()->birthdate ? Auth::user()->birthdate->format("Y-m-d") : "" }}',
+            age:                  '{{ Auth::user()->age ?? "" }}',
+            gender:               '{{ Auth::user()->gender ?? "" }}',
             email:                '{{ Auth::user()->email ?? "" }}',
-            phoneNumber:          '',
-            purokNo:              '',
+            phoneNumber:          '{{ Auth::user()->phone_number ?? "" }}',
+            purokNo:              '{{ Auth::user()->purok_no ?? "" }}',
             notes:                '',
             guardianName:         '',
             guardianRelationship: '',
@@ -1052,15 +1059,15 @@ function appointmentModal() {
                 appointment_date: this.selectedDate,
                 appointment_time: this.selectedTime,
                 // Use logged-in user data
-                first_name:   '{{ Auth::user()->name ?? "" }}'.split(' ')[0] || '{{ Auth::user()->name ?? "" }}',
-                middle_initial: '',
-                last_name:    '{{ Auth::user()->name ?? "" }}'.split(' ').slice(1).join(' ') || '.',
-                birthdate:    '{{ Auth::user()->birthdate ?? now()->subYears(25)->format("Y-m-d") }}',
-                age:          {{ Auth::user()->age ?? 25 }},
-                gender:       '{{ Auth::user()->gender ?? "other" }}',
-                email:        '{{ Auth::user()->email ?? "" }}',
-                phone_number: '{{ Auth::user()->phone_number ?? "N/A" }}',
-                purok_no:     '{{ Auth::user()->purok_no ?? "1" }}',
+                first_name:     this.formData.firstName || '{{ Auth::user()->name ?? "" }}',
+                middle_initial: this.formData.middleInitial || '',
+                last_name:      this.formData.lastName || '.',
+                birthdate:      this.formData.birthdate || '{{ Auth::user()->birthdate ? Auth::user()->birthdate->format("Y-m-d") : now()->subYears(25)->format("Y-m-d") }}',
+                age:            parseInt(this.formData.age) || {{ Auth::user()->age ?? 25 }},
+                gender:         this.formData.gender || '{{ Auth::user()->gender ?? "other" }}',
+                email:          this.formData.email || '{{ Auth::user()->email ?? "" }}',
+                phone_number:   this.formData.phoneNumber || '{{ Auth::user()->phone_number ?? "N/A" }}',
+                purok_no:       this.formData.purokNo || '{{ Auth::user()->purok_no ?? "1" }}',
                 notes:        this.medicineForm.instructions || '',
                 guardian_name: null,
                 guardian_relationship: null,

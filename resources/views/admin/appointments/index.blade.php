@@ -119,7 +119,7 @@
                         <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">No.</th>
                         <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">Patient Name</th>
                         <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">Date / Time</th>
-                        <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">Service</th>
+                        <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">Service / Type</th>
                         <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">Status</th>
                         <th class="px-4 py-3 text-sm font-semibold text-center text-gray-900 no-print">Action</th>
                     </tr>
@@ -141,7 +141,12 @@
                             {{ $appointment['appointment_date'] }}<br>
                             <span class="text-xs text-gray-400">{{ $appointment['appointment_time'] }}</span>
                         </td>
-                        <td class="px-4 py-3 text-sm text-gray-600">{{ $appointment['service_type'] }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">
+                            <p class="font-medium text-gray-900">{{ $appointment['service_type'] }}</p>
+                            @if(!empty($appointment['specific_service']) && $appointment['specific_service'] !== '—')
+                                <p class="text-xs text-gray-500 mt-0.5">{{ $appointment['specific_service'] }}</p>
+                            @endif
+                        </td>
                         <td class="px-4 py-3 text-sm">
                             @php $s = $appointment['status']; @endphp
                             @if($s==='pending')    <span class="px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">Pending</span>

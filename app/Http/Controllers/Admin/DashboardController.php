@@ -57,6 +57,7 @@ class DashboardController extends Controller
                     'status'           => $appointment->status,       // raw for badge logic
                     'status_label'     => $appointment->status_label, // label for display
                     'user_id'          => str_pad($appointment->user_id, 3, '0', STR_PAD_LEFT),
+                    'specific_service' => $appointment->specific_service ?? '—',
                 ];
             });
 

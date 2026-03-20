@@ -56,22 +56,26 @@
                         class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500" 
                         type="date" 
                         name="birthdate" 
-                        :value="old('birthdate')" 
+                        :value="old('birthdate')"
+                        max="{{ now()->toDateString() }}"
+                        oninput="calcAge(this.value)"
                         required />
                     <x-input-error :messages="$errors->get('birthdate')" class="mt-2" />
                 </div>
 
-                <!-- Age -->
+                <!-- Age (auto-calculated) -->
                 <div>
                     <x-input-label for="age" value="Age:" class="mb-2 font-semibold" />
                     <x-text-input id="age" 
-                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500" 
+                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg cursor-not-allowed bg-gray-50 focus:ring-0" 
                         type="number" 
                         name="age" 
+                        id="age"
                         :value="old('age')" 
-                        placeholder="Age"
+                        placeholder="Auto-filled from birthdate"
                         min="0"
-                        max="120" />
+                        max="120"
+                        readonly />
                     <x-input-error :messages="$errors->get('age')" class="mt-2" />
                 </div>
 
@@ -162,6 +166,24 @@
                     Login
                 </a>
             </div>
+
+            <script>
+                function calcAge(birthdate) {
+                    if (!birthdate) return;
+                    const today = new Date();
+                    const dob   = new Date(birthdate);
+                    let age = today.getFullYear() - dob.getFullYear();
+                    const m = today.getMonth() - dob.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+                    document.getElementById('age').value = age >= 0 ? age : '';
+                }
+
+                // Auto-fill on page load if old value exists (validation failed)
+                document.addEventListener('DOMContentLoaded', function () {
+                    const bd = document.getElementById('birthdate').value;
+                    if (bd) calcAge(bd);
+                });
+            </script>
         </form>
     </div>
 </x-guest-layout>
