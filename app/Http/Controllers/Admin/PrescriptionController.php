@@ -110,22 +110,12 @@ class PrescriptionController extends Controller
             'admin_notes'     => $request->input('notes', 'Approved by admin'),
         ]);
 
-        // ── Resolve the actual quantity to deduct ──────────────────────────
-        // Priority 1: quantity_requested column (from new medicine request form)
-        // Priority 2: parse from title/notes as last resort
-        // Never default to 1 blindly
-        $qty = 0;
+        // Re-fetch so we have the latest saved quantity_requested
+        $record = $record->fresh();
 
-        if (Schema::hasColumn('health_records', 'quantity_requested') &&
-            !is_null($record->quantity_requested) &&
-            $record->quantity_requested > 0) {
-            // ✅ Use the actual requested quantity
-            $qty = (int) $record->quantity_requested;
-        }
-
+        $qty          = (int) ($record->quantity_requested ?? 0);
         $medicineName = $record->medication_name ?? null;
 
-        // Only deduct if we have a valid medicine name AND quantity > 0
         if ($medicineName && $qty > 0 && Schema::hasTable('medicine_inventory')) {
             $inventoryItem = MedicineInventory::where('name', $medicineName)->first();
 
@@ -134,38 +124,83 @@ class PrescriptionController extends Controller
                 $inventoryItem->deduct($qty);
                 $stockAfter = $inventoryItem->fresh()->stock;
 
-                // Mark record as deducted
-                $deductData = [];
-                if (Schema::hasColumn('health_records', 'inventory_deducted')) {
-                    $deductData['inventory_deducted'] = true;
-                }
-                if (Schema::hasColumn('health_records', 'inventory_deducted_at')) {
-                    $deductData['inventory_deducted_at'] = now();
-                }
-                if (!empty($deductData)) {
-                    $record->update($deductData);
-                }
+                $this->markDeducted($record);
 
                 $stockWarning = $stockAfter < 50
                     ? " ⚠️ Stock is now low ({$stockAfter} {$inventoryItem->unit} remaining)."
                     : '';
 
                 return redirect()->back()->with('success',
-                    "Approved! Deducted {$qty} pcs of {$medicineName} from inventory. " .
+                    "Approved! Deducted {$qty} pcs of {$medicineName}. " .
                     "Stock: {$stockBefore} → {$stockAfter}.{$stockWarning}"
                 );
-            } else {
-                // Medicine not found in inventory — approve but warn
-                return redirect()->back()->with('success',
-                    "Request approved. Note: '{$medicineName}' was not found in inventory — stock was not deducted. Please add it to the inventory."
-                );
             }
+
+            return redirect()->back()->with('success',
+                "Request approved. Note: '{$medicineName}' was not found in inventory — stock was not deducted."
+            );
         }
 
-        // Approved but no quantity to deduct (e.g. old requests before quantity_requested column)
         return redirect()->back()->with('success',
-            'Medicine request approved. No inventory deduction (quantity not specified).'
+            $qty === 0
+                ? 'Medicine request approved. No inventory deduction (quantity not specified).'
+                : 'Medicine request approved.'
         );
+    }
+
+    /**
+     * Manually deduct inventory for an already-approved request.
+     */
+    public function deductInventory(int $id): RedirectResponse
+    {
+        $record = HealthRecord::findOrFail($id);
+
+        if ($record->approval_status !== 'approved') {
+            return redirect()->back()->with('error', 'Only approved requests can be deducted.');
+        }
+
+        if ($record->inventory_deducted) {
+            return redirect()->back()->with('error', 'Inventory already deducted for this request.');
+        }
+
+        $qty          = (int) ($record->quantity_requested ?? 0);
+        $medicineName = $record->medication_name ?? null;
+
+        if (!$medicineName || $qty <= 0) {
+            return redirect()->back()->with('error', 'Cannot deduct: medicine name or quantity is missing.');
+        }
+
+        $inventoryItem = Schema::hasTable('medicine_inventory')
+            ? MedicineInventory::where('name', $medicineName)->first()
+            : null;
+
+        if (!$inventoryItem) {
+            return redirect()->back()->with('error', "'{$medicineName}' not found in inventory.");
+        }
+
+        $stockBefore = $inventoryItem->stock;
+        $inventoryItem->deduct($qty);
+        $stockAfter = $inventoryItem->fresh()->stock;
+
+        $this->markDeducted($record);
+
+        return redirect()->back()->with('success',
+            "Deducted {$qty} pcs of {$medicineName}. Stock: {$stockBefore} → {$stockAfter}."
+        );
+    }
+
+    private function markDeducted(HealthRecord $record): void
+    {
+        $data = [];
+        if (Schema::hasColumn('health_records', 'inventory_deducted')) {
+            $data['inventory_deducted'] = true;
+        }
+        if (Schema::hasColumn('health_records', 'inventory_deducted_at')) {
+            $data['inventory_deducted_at'] = now();
+        }
+        if (!empty($data)) {
+            $record->update($data);
+        }
     }
 
     public function reject(Request $request, int $id): RedirectResponse

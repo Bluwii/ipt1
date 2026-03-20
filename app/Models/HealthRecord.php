@@ -41,6 +41,7 @@ class HealthRecord extends Model
     protected $casts = [
         'record_date'    => 'date',
         'next_dose_date' => 'date',
+        'quantity_requested'    => 'integer',
         'inventory_deducted'    => 'boolean',
         'inventory_deducted_at' => 'datetime',
     ];
