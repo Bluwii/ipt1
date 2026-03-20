@@ -19,7 +19,6 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
             </div>
-            {{-- Tab: Requests | Inventory --}}
             <div class="flex overflow-hidden border border-gray-200 rounded-lg">
                 <button onclick="showTab('requests')" id="tab-requests"
                         class="px-4 py-2 text-sm font-semibold text-white transition-colors bg-blue-600">
@@ -34,12 +33,17 @@
     </div>
 
     @if(session('success'))
-    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(()=>show=false,4000)"
+    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(()=>show=false,5000)"
          class="flex items-center gap-3 px-4 py-3 text-sm text-green-800 border border-green-200 rounded-lg bg-green-50">
         <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
         </svg>
         {{ session('success') }}
+    </div>
+    @endif
+    @if(session('error'))
+    <div class="flex items-center gap-3 px-4 py-3 text-sm text-red-700 border border-red-200 rounded-lg bg-red-50">
+        {{ session('error') }}
     </div>
     @endif
 
@@ -82,17 +86,11 @@
                             <td class="px-4 py-3 text-sm">
                                 @if($prescription['prescription_image'])
                                     <button onclick="openImageModal('{{ asset('storage/' . $prescription['prescription_image']) }}')"
-                                            class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-blue-700 transition-colors bg-blue-100 rounded-full hover:bg-blue-200">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                        With Rx
+                                            class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full hover:bg-blue-200">
+                                        📋 With Rx
                                     </button>
                                 @else
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 bg-gray-100 rounded-full">
-                                        No Rx
-                                    </span>
+                                    <span class="px-2 py-1 text-xs text-gray-500 bg-gray-100 rounded-full">No Rx</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-sm">
@@ -106,18 +104,15 @@
                             </td>
                             <td class="px-4 py-3 text-sm">
                                 <div class="flex items-center justify-center gap-2">
-                                    {{-- View Detail --}}
                                     <a href="{{ route('admin.prescriptions.show', $prescription['id']) }}"
                                        class="px-3 py-1.5 text-xs font-semibold text-white bg-gray-700 rounded hover:bg-gray-900">
                                         View
                                     </a>
-
-                                    {{-- Quick approve/reject for pending --}}
                                     @if($prescription['approval_status'] === 'pending')
                                     <form method="POST" action="{{ route('admin.prescriptions.approve', $prescription['id']) }}" class="inline">
                                         @csrf
                                         <button type="submit"
-                                                onclick="return confirm('Approve this medicine request?')"
+                                                onclick="return confirm('Approve this request? The quantity will be automatically deducted from inventory.')"
                                                 class="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700">
                                             Approve
                                         </button>
@@ -132,14 +127,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-12 text-sm text-center text-gray-500">
-                                <div class="flex flex-col items-center gap-2">
-                                    <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                                    </svg>
-                                    No medicine requests found.
-                                </div>
-                            </td>
+                            <td colspan="7" class="px-4 py-12 text-sm text-center text-gray-500">No medicine requests found.</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -148,11 +136,42 @@
         </div>
     </div>
 
-    {{-- ══ INVENTORY TAB ══ --}}
+    {{-- ══ INVENTORY TAB (reads from DB) ══ --}}
     <div id="panel-inventory" class="hidden">
+
+        {{-- Stock Summary Cards --}}
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="p-4 bg-white border-2 border-green-200 shadow rounded-xl">
+                <p class="text-sm font-medium text-gray-600">In Stock</p>
+                <p class="mt-1 text-3xl font-bold text-green-600">
+                    {{ $inventory->where('stock', '>=', 50)->count() }}
+                </p>
+                <p class="text-xs text-gray-500">medicines</p>
+            </div>
+            <div class="p-4 bg-white border-2 border-yellow-200 shadow rounded-xl">
+                <p class="text-sm font-medium text-gray-600">Low Stock</p>
+                <p class="mt-1 text-3xl font-bold text-yellow-600">
+                    {{ $inventory->where('stock', '>', 0)->where('stock', '<', 50)->count() }}
+                </p>
+                <p class="text-xs text-gray-500">medicines (&lt; 50 pcs)</p>
+            </div>
+            <div class="p-4 bg-white border-2 border-red-200 shadow rounded-xl">
+                <p class="text-sm font-medium text-gray-600">Out of Stock</p>
+                <p class="mt-1 text-3xl font-bold text-red-600">
+                    {{ $inventory->where('stock', '<=', 0)->count() }}
+                </p>
+                <p class="text-xs text-gray-500">medicines</p>
+            </div>
+        </div>
+
         <div class="p-6 bg-white shadow rounded-xl">
             <div class="flex items-center justify-between mb-5">
-                <h3 class="text-lg font-bold text-gray-900">Medicine Inventory</h3>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Medicine Inventory</h3>
+                    <p class="mt-0.5 text-xs text-gray-500">
+                        Stock automatically deducts when a medicine request is approved.
+                    </p>
+                </div>
                 <button onclick="document.getElementById('addMedicineModal').classList.remove('hidden')"
                         class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,9 +180,9 @@
                     Add Medicine
                 </button>
             </div>
-            <p class="mb-4 text-sm text-gray-500">These medicines are shown to patients when they request medicine. Manage your health center's available stock here.</p>
+
             <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full" id="inventoryTable">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">Medicine Name</th>
@@ -171,82 +190,65 @@
                             <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">Stock</th>
                             <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">Unit</th>
                             <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">Status</th>
+                            <th class="px-4 py-3 text-sm font-semibold text-left text-gray-900">Available</th>
                             <th class="px-4 py-3 text-sm font-semibold text-center text-gray-900">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                        @php
-                        $inventory = [
-                            ['name'=>'Paracetamol 500mg','category'=>'Pain Relief / Fever','stock'=>500,'unit'=>'tablets','status'=>'In Stock'],
-                            ['name'=>'Mefenamic Acid 500mg','category'=>'Pain Relief','stock'=>200,'unit'=>'tablets','status'=>'In Stock'],
-                            ['name'=>'Amoxicillin 500mg','category'=>'Antibiotic','stock'=>150,'unit'=>'capsules','status'=>'In Stock'],
-                            ['name'=>'Amoxicillin 250mg (Syrup)','category'=>'Antibiotic','stock'=>30,'unit'=>'bottles','status'=>'Low Stock'],
-                            ['name'=>'Cetirizine 10mg','category'=>'Antihistamine','stock'=>100,'unit'=>'tablets','status'=>'In Stock'],
-                            ['name'=>'Loratadine 10mg','category'=>'Antihistamine','stock'=>0,'unit'=>'tablets','status'=>'Out of Stock'],
-                            ['name'=>'Amlodipine 5mg','category'=>'Hypertension','stock'=>300,'unit'=>'tablets','status'=>'In Stock'],
-                            ['name'=>'Amlodipine 10mg','category'=>'Hypertension','stock'=>200,'unit'=>'tablets','status'=>'In Stock'],
-                            ['name'=>'Losartan 50mg','category'=>'Hypertension','stock'=>250,'unit'=>'tablets','status'=>'In Stock'],
-                            ['name'=>'Metformin 500mg','category'=>'Diabetes','stock'=>25,'unit'=>'tablets','status'=>'Low Stock'],
-                            ['name'=>'Ferrous Sulfate 325mg','category'=>'Supplement','stock'=>400,'unit'=>'tablets','status'=>'In Stock'],
-                            ['name'=>'Vitamin A 10,000 IU','category'=>'Vitamin / Supplement','stock'=>1000,'unit'=>'capsules','status'=>'In Stock'],
-                            ['name'=>'Vitamin B Complex','category'=>'Vitamin / Supplement','stock'=>600,'unit'=>'tablets','status'=>'In Stock'],
-                            ['name'=>'Multivitamins','category'=>'Vitamin / Supplement','stock'=>800,'unit'=>'tablets','status'=>'In Stock'],
-                            ['name'=>'Ascorbic Acid 500mg','category'=>'Vitamin / Supplement','stock'=>500,'unit'=>'tablets','status'=>'In Stock'],
-                            ['name'=>'ORS (Oral Rehydration Salts)','category'=>'Rehydration','stock'=>200,'unit'=>'sachets','status'=>'In Stock'],
-                            ['name'=>'Salbutamol 2mg','category'=>'Respiratory','stock'=>0,'unit'=>'tablets','status'=>'Out of Stock'],
-                            ['name'=>'Cotrimoxazole 400/80mg','category'=>'Antibiotic','stock'=>100,'unit'=>'tablets','status'=>'In Stock'],
-                            ['name'=>'Omeprazole 20mg','category'=>'Gastrointestinal','stock'=>80,'unit'=>'capsules','status'=>'Low Stock'],
-                            ['name'=>'Antacid (Aluminum Hydroxide)','category'=>'Gastrointestinal','stock'=>150,'unit'=>'tablets','status'=>'In Stock'],
-                            ['name'=>'Ibuprofen 200mg','category'=>'Pain Relief / Anti-inflammatory','stock'=>300,'unit'=>'tablets','status'=>'In Stock'],
-                        ];
-                        @endphp
-                        @foreach($inventory as $i => $med)
-                        <tr class="transition-colors hover:bg-gray-50" id="inv-row-{{ $i }}">
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $med['name'] }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $med['category'] }}</td>
+                        @forelse($inventory as $med)
+                        <tr class="transition-colors hover:bg-gray-50">
+                            <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $med->name }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $med->category }}</td>
                             <td class="px-4 py-3 text-sm">
-                                <span id="stock-display-{{ $i }}" class="font-semibold {{ $med['stock'] == 0 ? 'text-red-600' : ($med['stock'] < 50 ? 'text-yellow-600' : 'text-gray-900') }}">
-                                    {{ $med['stock'] }}
+                                <span class="font-bold text-lg {{ $med->stock <= 0 ? 'text-red-600' : ($med->stock < 50 ? 'text-yellow-600' : 'text-gray-900') }}">
+                                    {{ $med->stock }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $med['unit'] }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $med->unit }}</td>
                             <td class="px-4 py-3 text-sm">
-                                @if($med['status'] === 'In Stock')
-                                    <span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">In Stock</span>
-                                @elseif($med['status'] === 'Low Stock')
-                                    <span class="px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">Low Stock</span>
-                                @else
+                                @if($med->stock <= 0)
                                     <span class="px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Out of Stock</span>
+                                @elseif($med->stock < 50)
+                                    <span class="px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">⚠ Low Stock</span>
+                                @else
+                                    <span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">In Stock</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-sm text-center">
-                                <div class="flex items-center justify-center gap-2">
-                                    <button onclick="openEditInventory({{ $i }}, '{{ addslashes($med['name']) }}', {{ $med['stock'] }}, '{{ $med['unit'] }}')"
-                                            class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
-                                        Edit Stock
+                            <td class="px-4 py-3 text-sm">
+                                <form method="POST" action="{{ route('admin.inventory.toggleAvailable', $med->id) }}">
+                                    @csrf @method('PATCH')
+                                    <button type="submit"
+                                            class="px-2 py-1 text-xs font-semibold rounded-full transition-colors {{ $med->is_available ? 'text-green-700 bg-green-100 hover:bg-green-200' : 'text-gray-600 bg-gray-100 hover:bg-gray-200' }}">
+                                        {{ $med->is_available ? '✓ Visible' : '✗ Hidden' }}
                                     </button>
-                                </div>
+                                </form>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-center">
+                                <button onclick="openEditStock({{ $med->id }}, '{{ addslashes($med->name) }}', {{ $med->stock }}, '{{ $med->unit }}')"
+                                        class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
+                                    Edit Stock
+                                </button>
                             </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="7" class="px-4 py-8 text-sm text-center text-gray-500">
+                                No medicines in inventory. <a href="#" onclick="document.getElementById('addMedicineModal').classList.remove('hidden')" class="text-blue-600 hover:underline">Add one now.</a>
+                            </td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-
 </div>
 
 {{-- Image Modal --}}
 <div id="imageModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-75" onclick="closeImageModal()">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="relative max-w-2xl" onclick="event.stopPropagation()">
-            <button onclick="closeImageModal()"
-                    class="absolute top-0 right-0 p-2 -mt-10 -mr-10 text-white bg-red-600 rounded-full hover:bg-red-700">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
+            <button onclick="closeImageModal()" class="absolute top-0 right-0 p-2 -mt-10 -mr-10 text-white bg-red-600 rounded-full hover:bg-red-700">✕</button>
             <img id="modalImage" src="" alt="Prescription" class="max-w-full max-h-screen rounded-lg shadow-2xl">
         </div>
     </div>
@@ -260,59 +262,46 @@
             <form id="rejectForm" method="POST" class="space-y-4">
                 @csrf
                 <div>
-                    <label class="block mb-1.5 text-sm font-semibold text-gray-700">
-                        Reason for rejection <span class="text-red-500">*</span>
-                    </label>
+                    <label class="block mb-1.5 text-sm font-semibold text-gray-700">Reason for rejection <span class="text-red-500">*</span></label>
                     <textarea name="reason" required rows="4"
                               class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400"
                               placeholder="Explain why this request is being rejected..."></textarea>
                 </div>
-                <div class="flex justify-end gap-3 pt-1">
+                <div class="flex justify-end gap-3">
                     <button type="button" onclick="closeRejectModal()"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-                        Cancel
-                    </button>
-                    <button type="submit"
-                            class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700">
-                        Confirm Rejection
-                    </button>
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700">Confirm Rejection</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-{{-- Edit Inventory Modal --}}
-<div id="editInventoryModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50">
+{{-- Edit Stock Modal --}}
+<div id="editStockModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50">
     <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="w-full max-w-md p-6 bg-white shadow-2xl rounded-2xl">
+        <div class="w-full max-w-sm p-6 bg-white shadow-2xl rounded-2xl">
             <h3 class="mb-1 text-xl font-bold text-gray-900">Edit Stock</h3>
-            <p id="editMedicineName" class="mb-5 text-sm text-gray-500"></p>
-            <div class="space-y-4">
+            <p id="editStockName" class="mb-5 text-sm text-gray-500"></p>
+            <form id="editStockForm" method="POST" class="space-y-4">
+                @csrf @method('PATCH')
                 <div>
-                    <label class="block mb-1.5 text-sm font-semibold text-gray-700">Current Stock</label>
-                    <input type="number" id="editStockInput" min="0"
-                           class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block mb-1.5 text-sm font-semibold text-gray-700">Unit</label>
-                    <input type="text" id="editUnitInput" readonly
-                           class="w-full px-4 py-2.5 text-sm border border-gray-100 rounded-lg bg-gray-50 text-gray-500">
+                    <label class="block mb-1.5 text-sm font-semibold text-gray-700">Stock Count</label>
+                    <div class="flex items-center gap-2">
+                        <input type="number" name="stock" id="editStockInput" min="0"
+                               class="flex-1 px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <span id="editStockUnit" class="text-sm text-gray-500"></span>
+                    </div>
                 </div>
                 <div class="p-3 text-xs text-blue-800 border border-blue-200 rounded-lg bg-blue-50">
-                    💡 Updating stock here helps the admin track how much medicine is available for patient requests. Low stock (&lt;50) and out of stock (0) will be highlighted.
+                    💡 Use this to restock when new medicines arrive at the health center.
                 </div>
-            </div>
-            <div class="flex justify-end gap-3 mt-5">
-                <button onclick="closeEditInventory()"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-                    Cancel
-                </button>
-                <button onclick="saveInventory()"
-                        class="px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-                    Save Stock
-                </button>
-            </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeEditStock()"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700">Save Stock</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -321,17 +310,17 @@
 <div id="addMedicineModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="w-full max-w-md p-6 bg-white shadow-2xl rounded-2xl">
-            <h3 class="mb-5 text-xl font-bold text-gray-900">Add New Medicine to Inventory</h3>
-            <div class="space-y-4">
+            <h3 class="mb-5 text-xl font-bold text-gray-900">Add New Medicine</h3>
+            <form method="POST" action="{{ route('admin.inventory.store') }}" class="space-y-4">
+                @csrf
                 <div>
                     <label class="block mb-1.5 text-sm font-semibold text-gray-700">Medicine Name <span class="text-red-500">*</span></label>
-                    <input type="text" id="newMedicineName" placeholder="e.g. Amoxicillin 250mg"
+                    <input type="text" name="name" required placeholder="e.g. Amoxicillin 250mg"
                            class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block mb-1.5 text-sm font-semibold text-gray-700">Category</label>
-                    <select id="newMedicineCategory"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <select name="category" class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option>Pain Relief / Fever</option>
                         <option>Antibiotic</option>
                         <option>Antihistamine</option>
@@ -348,13 +337,12 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block mb-1.5 text-sm font-semibold text-gray-700">Initial Stock</label>
-                        <input type="number" id="newMedicineStock" min="0" value="0"
+                        <input type="number" name="stock" min="0" value="0"
                                class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
                         <label class="block mb-1.5 text-sm font-semibold text-gray-700">Unit</label>
-                        <select id="newMedicineUnit"
-                                class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <select name="unit" class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                             <option>tablets</option>
                             <option>capsules</option>
                             <option>bottles</option>
@@ -364,41 +352,28 @@
                         </select>
                     </div>
                 </div>
-                <div class="p-3 text-xs border rounded-lg text-amber-800 bg-amber-50 border-amber-200">
-                    ⚠️ Note: After adding a medicine here, update the medicine list in the <code class="px-1 rounded bg-amber-100">records/index.blade.php</code> file so patients can select it when requesting.
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="document.getElementById('addMedicineModal').classList.add('hidden')"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700">Add Medicine</button>
                 </div>
-            </div>
-            <div class="flex justify-end gap-3 mt-5">
-                <button onclick="document.getElementById('addMedicineModal').classList.add('hidden')"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-                    Cancel
-                </button>
-                <button onclick="addMedicine()"
-                        class="px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-                    Add Medicine
-                </button>
-            </div>
+            </form>
         </div>
     </div>
 </div>
 
 <script>
-// ── Tab switching ─────────────────────────────────────────────────────────
 function showTab(tab) {
-    ['requests', 'inventory'].forEach(t => {
+    ['requests','inventory'].forEach(t => {
         document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
         const btn = document.getElementById('tab-' + t);
-        if (t === tab) {
-            btn.classList.add('bg-blue-600', 'text-white');
-            btn.classList.remove('bg-white', 'text-gray-600');
-        } else {
-            btn.classList.remove('bg-blue-600', 'text-white');
-            btn.classList.add('bg-white', 'text-gray-600');
-        }
+        btn.classList.toggle('bg-blue-600', t === tab);
+        btn.classList.toggle('text-white',    t === tab);
+        btn.classList.toggle('bg-white',      t !== tab);
+        btn.classList.toggle('text-gray-600', t !== tab);
     });
 }
 
-// ── Search ────────────────────────────────────────────────────────────────
 document.getElementById('searchInput').addEventListener('input', function () {
     const q = this.value.toLowerCase();
     document.querySelectorAll('#prescriptionsTable tbody tr').forEach(row => {
@@ -406,80 +381,25 @@ document.getElementById('searchInput').addEventListener('input', function () {
     });
 });
 
-// ── Image Modal ───────────────────────────────────────────────────────────
 function openImageModal(src) {
     document.getElementById('modalImage').src = src;
     document.getElementById('imageModal').classList.remove('hidden');
 }
-function closeImageModal() {
-    document.getElementById('imageModal').classList.add('hidden');
-}
+function closeImageModal() { document.getElementById('imageModal').classList.add('hidden'); }
 
-// ── Reject Modal ──────────────────────────────────────────────────────────
 function openRejectModal(id) {
     document.getElementById('rejectForm').action = '/admin/prescriptions/' + id + '/reject';
     document.getElementById('rejectModal').classList.remove('hidden');
 }
-function closeRejectModal() {
-    document.getElementById('rejectModal').classList.add('hidden');
-}
+function closeRejectModal() { document.getElementById('rejectModal').classList.add('hidden'); }
 
-// ── Edit Inventory ────────────────────────────────────────────────────────
-let editingRow = null;
-
-function openEditInventory(rowIndex, name, stock, unit) {
-    editingRow = rowIndex;
-    document.getElementById('editMedicineName').textContent = name;
+function openEditStock(id, name, stock, unit) {
+    document.getElementById('editStockName').textContent = name;
     document.getElementById('editStockInput').value = stock;
-    document.getElementById('editUnitInput').value = unit;
-    document.getElementById('editInventoryModal').classList.remove('hidden');
+    document.getElementById('editStockUnit').textContent = unit;
+    document.getElementById('editStockForm').action = '/admin/inventory/' + id;
+    document.getElementById('editStockModal').classList.remove('hidden');
 }
-
-function closeEditInventory() {
-    document.getElementById('editInventoryModal').classList.add('hidden');
-    editingRow = null;
-}
-
-function saveInventory() {
-    if (editingRow === null) return;
-    const newStock = parseInt(document.getElementById('editStockInput').value, 10);
-    if (isNaN(newStock) || newStock < 0) {
-        alert('Please enter a valid stock number.');
-        return;
-    }
-
-    // Update the display cell
-    const displayEl = document.getElementById('stock-display-' + editingRow);
-    if (displayEl) {
-        displayEl.textContent = newStock;
-        displayEl.className = 'font-semibold ' + (
-            newStock === 0 ? 'text-red-600' :
-            newStock < 50 ? 'text-yellow-600' : 'text-gray-900'
-        );
-    }
-
-    // Note: In production, send PATCH to /admin/medicine-inventory/{id}
-    // For now, it updates the UI only
-    closeEditInventory();
-
-    // Show a brief success flash
-    const flash = document.createElement('div');
-    flash.className = 'fixed top-4 right-4 z-[999] px-4 py-3 text-sm font-semibold text-white bg-green-600 rounded-lg shadow-lg';
-    flash.textContent = '✓ Stock updated successfully';
-    document.body.appendChild(flash);
-    setTimeout(() => flash.remove(), 2500);
-}
-
-function addMedicine() {
-    const name = document.getElementById('newMedicineName').value.trim();
-    if (!name) { alert('Please enter a medicine name.'); return; }
-    document.getElementById('addMedicineModal').classList.add('hidden');
-
-    const flash = document.createElement('div');
-    flash.className = 'fixed top-4 right-4 z-[999] px-4 py-3 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-lg';
-    flash.innerHTML = '✓ Medicine added. Remember to update the patient-facing medicine list in <code>records/index.blade.php</code>.';
-    document.body.appendChild(flash);
-    setTimeout(() => flash.remove(), 4000);
-}
+function closeEditStock() { document.getElementById('editStockModal').classList.add('hidden'); }
 </script>
 @endsection

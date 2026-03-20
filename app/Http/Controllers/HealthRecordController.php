@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\HealthRecord;
+use App\Models\MedicineInventory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -17,10 +18,9 @@ class HealthRecordController extends Controller
     {
         $user = Auth::user();
 
-        // ── Backfill: create health records for any completed appointments ──
+        // Backfill health records from completed appointments
         $this->backfillFromCompletedAppointments($user->id);
 
-        // ── Query the health_records table ──
         $consultations = HealthRecord::forUser($user->id)
             ->consultations()
             ->orderBy('record_date', 'desc')
@@ -36,14 +36,25 @@ class HealthRecordController extends Controller
             ->orderBy('record_date', 'desc')
             ->get();
 
-        return view('records.index', compact('consultations', 'vaccinations', 'prescriptions'));
+        // Load available medicines from inventory (DB-driven)
+        // Falls back to empty collection if table doesn't exist yet
+        $availableMedicines = collect();
+        if (Schema::hasTable('medicine_inventory')) {
+            $availableMedicines = MedicineInventory::available()
+                ->orderBy('category')
+                ->orderBy('name')
+                ->get()
+                ->groupBy('category');
+        }
+
+        return view('records.index', compact(
+            'consultations',
+            'vaccinations',
+            'prescriptions',
+            'availableMedicines'
+        ));
     }
 
-    /**
-     * For every completed appointment belonging to this user,
-     * create a health record if one doesn't already exist.
-     * Uses try/catch per record so one failure doesn't block the rest.
-     */
     private function backfillFromCompletedAppointments(int $userId): void
     {
         $serviceToRecordType = [
@@ -63,13 +74,10 @@ class HealthRecordController extends Controller
             if (!$recordType) continue;
 
             try {
-                // Parse date safely regardless of whether it's cast as Carbon or a string
-                $dateCarbon = $apt->appointment_date instanceof \Carbon\Carbon
+                $dateCarbon = $apt->appointment_date instanceof Carbon
                     ? $apt->appointment_date
                     : Carbon::parse($apt->appointment_date);
 
-                // Check for duplicate — use source_appointment_id if column exists,
-                // otherwise fall back to matching by user + date + type
                 if ($hasSourceColumn) {
                     $exists = HealthRecord::where('user_id', $userId)
                         ->where('source_appointment_id', $apt->id)
@@ -84,10 +92,10 @@ class HealthRecordController extends Controller
                 if ($exists) continue;
 
                 $title = match($apt->service_type) {
-                    'checkup'  => 'Consultation – ' . $dateCarbon->format('M d, Y'),
-                    'vaccine'  => 'Vaccination – '  . $dateCarbon->format('M d, Y'),
+                    'checkup'  => 'Consultation – '        . $dateCarbon->format('M d, Y'),
+                    'vaccine'  => 'Vaccination – '         . $dateCarbon->format('M d, Y'),
                     'medicine' => 'Prescription Request – ' . $dateCarbon->format('M d, Y'),
-                    default    => 'Health Record – ' . $dateCarbon->format('M d, Y'),
+                    default    => 'Health Record – '        . $dateCarbon->format('M d, Y'),
                 };
 
                 $payload = [
@@ -100,7 +108,6 @@ class HealthRecordController extends Controller
                     'approval_status' => $recordType === 'prescription' ? 'pending' : null,
                 ];
 
-                // Only set source_appointment_id if the column exists
                 if ($hasSourceColumn) {
                     $payload['source_appointment_id'] = $apt->id;
                 }
@@ -108,7 +115,6 @@ class HealthRecordController extends Controller
                 HealthRecord::create($payload);
 
             } catch (\Throwable $e) {
-                // Log error but don't break the page
                 Log::warning("Health record backfill failed for appointment {$apt->id}: " . $e->getMessage());
             }
         }

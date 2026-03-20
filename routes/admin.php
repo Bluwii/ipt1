@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\HealthRecordController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DataRecordController;
 use App\Http\Controllers\Admin\PrescriptionController;
+use App\Http\Controllers\Admin\MedicineInventoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -47,6 +48,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/prescriptions/{id}/reject',  [PrescriptionController::class, 'reject'])->name('prescriptions.reject');
     Route::post('/prescriptions/{id}/deduct-inventory', [PrescriptionController::class, 'deductInventory'])
          ->name('prescriptions.deductInventory');
+
+        // Medicine Inventory
+    Route::post('/inventory',                        [MedicineInventoryController::class, 'store'])->name('inventory.store');
+    Route::patch('/inventory/{inventory}',           [MedicineInventoryController::class, 'update'])->name('inventory.update');
+    Route::patch('/inventory/{inventory}/toggle',    [MedicineInventoryController::class, 'toggleAvailable'])->name('inventory.toggleAvailable');
 
     // Users Management
     Route::get('/users',                          [UserController::class, 'index'])->name('users.index');
